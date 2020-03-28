@@ -1,14 +1,16 @@
-## How do we plan to collaborate?
+## Code of conduct
+
+#### How do we plan to collaborate?
 ______
 
-## How do we ensure that everyone in our group stays informed about the individual contributions?
+#### How do we ensure that everyone in our group stays informed about the individual contributions?
 ______
 
-## How do we ensure knowledge transfer among our team members?
+#### How do we ensure knowledge transfer among our team members?
 ______
 
-## What is our usual communication plan?
+#### What is our usual communication plan?
 ______
 
-## How will we solve conflicts? 
+#### How will we solve conflicts? 
 
