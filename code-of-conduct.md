@@ -29,6 +29,9 @@ ______
 ______
 
 #### How do we ensure knowledge transfer among our team members?
+* We ensure knowledge transfer through sharing required information sources on our communication platforms and addressing any issues in related meetings.
+* We will use code review at the end of each sprint where contributors have to be able to explain and justify their implemented methods.  
+
 ______
 
 #### What is our usual communication plan?
