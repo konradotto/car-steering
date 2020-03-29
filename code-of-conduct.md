@@ -49,3 +49,10 @@ ______
 
 #### How will we solve conflicts? 
 
+* Responsibilities are divided so we need to ensure each member understands their task. Each member will be responsible to be honest with the group and if members are stuck, the issue should be resolved before the deadline of the task. 
+
+* Each member is responsible for showing up to the meetings that are in place and shall communicate in case they cannot join. In cases where a member misses meetings regularly or does not communicate about it, the procedures to be taken will be discussed and considered to take place after consulting the course organizer.
+
+* In case of a conflict between two members, the two will have to communicate directly to each other in a constructive manner. If the conflict is not resolved, the team should get involved to find a solution to the issue. If the team's opinion is split, the team will ask for an additional opinion outside of the team, most likely a TA, and if it still is not resolved, a random draw will be made to randomly select a solution and the team has to accept the outcome.
+
+
