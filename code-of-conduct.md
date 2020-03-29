@@ -26,6 +26,19 @@ ______
 ______
 
 #### What is our usual communication plan?
+
+We are planning to have 3 fixed meetings a week (see [sprint schedule](#sprint-schedule)). These meetings will be held on a dedicated Discord server.
+
+Besides these meetings we are available for communication via text (simple questions) and voice-chat (further discussions, collaboration, fixing issues, coding sessions) on our Discord server.
+
+Our sprintboard on Trello and the progress in the GitLab repository will help us monitor the project progress in between meetings.
+
+Summarised, we will be communicating via the following channels:
+- A dedicated Discord server
+- A dedicated Whatsapp group
+- Trello
+- GitLab
+
 ______
 
 #### How will we solve conflicts? 
