@@ -5,6 +5,9 @@
 
 * Sprints last a week and a Trello is set up with a sprint backlog containing work items to make it easier to allocate tasks.
 
+* We will use Scrum and utilize trello to allocate our selves to tasks. We will also have a Scrum master that rotates weekly.
+
+    [Trello Board](https://trello.com/b/IhibG1ul)
 ##### Sprint schedule: 
 
 ###### Tuesday: Sprint planning
