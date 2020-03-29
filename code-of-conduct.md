@@ -23,6 +23,8 @@
 ______
 
 #### How do we ensure that everyone in our group stays informed about the individual contributions?
+* A kanban Trello board for visualizing work items of a sprint and their status.
+* Our definition of done contains that code is peer-reviewed. Individual contributions therefore need to be committed by Saturday evening to allow for other team-members to review them. This will improve code quality and ensure a general understanding of all parts of our project.
 ______
 
 #### How do we ensure knowledge transfer among our team members?
