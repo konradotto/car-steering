@@ -43,7 +43,8 @@ for getting in touch:
 
 ## Rules for Commit Messages
 
-Our rules for commit messages are inspired through the article on ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by . We have written them down in accordance with the rules for their subject lines:
+Our rules for commit messages are inspired through the article on ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by Chris Beams.  
+We have written them down in accordance with the rules for their subject lines:
 
 - Write short subject lines for all commit messages
 - Begin subject lines with a capitalized verb
@@ -54,3 +55,6 @@ Our rules for commit messages are inspired through the article on ["How to Write
 - Wrap body at 72 characters
 - Use keywords to close, fix or resolve issues from the body (e.g.: “Fixes #666)
 
+## License
+
+We decided on using the [**MIT License**](LICENSE) for open source projects.
