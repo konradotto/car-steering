@@ -2,6 +2,7 @@
 
 ## Our Project
 
+This section will eventually be used to describe what our project delivers, what our goals and use-cases are and what visions we have for its future.
 
 ## Team Members
 
@@ -16,7 +17,12 @@ for getting in touch:
 
 ## Build Instructions
 
+This section provides detailed instructions to help users new to our project to get everything set up and running in no time.
+
 ### Dependencies
+
+These dependencies are required to successfully build our project:
+
 * Cmake (3.10.X)
 * Make (4.1.X)
 * G++ (7.5.X)
@@ -25,6 +31,9 @@ for getting in touch:
 * Linux OS
 
 ### Step-by-Step
+
+With the previously listed minimal dependencies, you should be able to run our project by executing these steps in your terminal:
+
 * Create new folder using `mkdir <FolderName>` from the terminal
 * In the terminal `cd` in that folder
 * Go to gitlab and copy the SSH-Key
@@ -36,7 +45,11 @@ for getting in touch:
 
 ## Our Workflow
 
+This section describes the workflow we have agreed on for both *Adding New Features* and *Fixing Bugs* with GitLab.
+
 ### Adding New Features
+We have decided to follow these steps when adding new features to our project:
+
 1. Create a milestone representing the final feature to be implemented, and specify the time frame.
 2. Add an issue describing the sub-feature that solves part of the feature and link it to the milestone.
 3. Assign a member to the created issue.
@@ -46,9 +59,9 @@ for getting in touch:
 6. Once the code is reviewed and proved stable on `develop`, create a pull request to merge develop with `master`.
 7. Delete the feature branch and close the issue.
 
-### Bugfixing
+### Fixing Bugs
 
-Our workflow for bugfixing or the removal of unwanted behaviour from our project contains the following steps:
+Our workflow for fixing bugs or removing unwanted behaviour from our project consists of the following steps:
 
 1. Detect a unwanted behaviour. This will usually happen one of the following ways:
     - Author observes unintended behaviour
@@ -71,8 +84,8 @@ Our workflow for bugfixing or the removal of unwanted behaviour from our project
 
 ## Rules for Commit Messages
 
-Our rules for commit messages are inspired through the article on ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by Chris Beams and ["How to Write Good Commit Messages: A Practical Git Guide"](https://www.freecodecamp.org/news/writing-good-commit-messages-a-practical-guide/) by Bolaji Ayodeji.  
-We have written them down in accordance with the rules for their subject lines:
+Our rules for commit messages are inspired through the articles ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by Chris Beams and ["How to Write Good Commit Messages: A Practical Git Guide"](https://www.freecodecamp.org/news/writing-good-commit-messages-a-practical-guide/) by Bolaji Ayodeji.  
+We have written them down in accordance with the rules for their subject lines (except the 50 character limit):
 
 - Write short subject lines for all commit messages
 - Begin subject lines with a capitalized verb
