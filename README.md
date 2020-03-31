@@ -71,17 +71,21 @@ Our workflow for bugfixing or the removal of unwanted behaviour from our project
 
 ## Rules for Commit Messages
 
-Our rules for commit messages are inspired through the article on ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by Chris Beams.  
+Our rules for commit messages are inspired through the article on ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by Chris Beams and ["How to Write Good Commit Messages: A Practical Git Guide"](https://www.freecodecamp.org/news/writing-good-commit-messages-a-practical-guide/) by Bolaji Ayodeji.  
 We have written them down in accordance with the rules for their subject lines:
 
 - Write short subject lines for all commit messages
 - Begin subject lines with a capitalized verb
 - Write subject lines in imperative mood (e.g. “Fix formatting of file x”)
+- End subject line after max 50 characters
 - End subject lines without punctuation
 - Separate subject line and optional body with a blank line
-- End subject line after max 50 characters
+- Use the body to explain *what* and *why*
+- Do not assume the reviewer understands what the original problem was; make sure to add it in the body
+- Do not think your code is self-explanatory
 - Wrap body at 72 characters
-- Use keywords to close, fix or resolve issues from the body (e.g.: “Fixes #666)
+- Capitalize all paragraphs
+- Use keywords to close, fix or resolve issues at the bottom of the body (e.g.: “Fixes: #666)
 
 ## License
 
