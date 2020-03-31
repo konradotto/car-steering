@@ -37,6 +37,14 @@ for getting in touch:
 ## Our Workflow
 
 ### Adding New Features
+1. Create a milestone representing the final feature to be implemented, and specify the time frame.
+2. Add an issue describing the sub-feature that solves part of the feature and link it to the milestone.
+3. Assign a member to the created issue.
+4. Create a feature branch that links to the issue i.e:
+ ` feature / <issueDescription> - <issue-number> `.
+5. Create a pull request to merge the feature branch with the `develop` branch only if the latest commit on the feature branch passes the pipeline tests.
+6. Once the code is reviewed and proved stable on `develop`, create a pull request to merge develop with `master`.
+7. Delete the feature branch and close the issue.
 
 ### Bugfixing
 
