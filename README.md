@@ -48,6 +48,26 @@ for getting in touch:
 
 ### Bugfixing
 
+Our workflow for bugfixing or the removal of unwanted behaviour from our project contains the following steps:
+
+1. Detect a unwanted behaviour. This will usually happen one of the following ways:
+    - Author observes unintended behaviour
+    - Code review detects bug
+    - Automated tests reveal bug
+    - Manual test reveals bug
+2. Take further steps to better understand the bug and be able to describe it as detailed as possible. These steps include but are not limited to:
+    - Using a debugger (step-by-step execution and other helpful functionalities)
+    - Running further tests
+3. Open an [issue on GitLab](https://git.chalmers.se/courses/dit638/students/group_13/issues/new?issue%5Bassignee_id%5D=&issue%5Bmilestone_id%5D=#) to report the bug:
+    - Pick a title for the bug
+    - Choose our [BUG-template](.gitlab/issue_templates/BUG.md)
+    - Fill the different sections to describe *Expected Behaviour*, *Current Behaviour*, suggest a *Possible Solution*, list *Steps to Reproduce*, give *Context* and more
+4. Add a card on [Trello](https://trello.com/b/Gtc7wuxz/team-sprintboard) to solve the bug according to our process
+5. Assign the bug (either immediately or during the next sprint planning). Ideally the solution involves:
+    - Authors of the relevant code
+    - Person who issued the bug-report
+6. The assignees find the root cause of the unwanted behaviour and resolve it
+
 
 ## Rules for Commit Messages
 
