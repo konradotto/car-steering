@@ -23,12 +23,10 @@ This section provides detailed instructions to help users new to our project to 
 
 These dependencies are required to successfully build our project:
 
-* Cmake (3.10.X)
-* Make (4.1.X)
-* G++ (7.5.X)
-* Docker (19.03.X)
-* Docker-compose (1.25.X)
-* Linux OS
+* No dependencies! The following dependencies is a part of the source distribution:  
+    * Cmake (3.10.X)
+    * Make (4.1.X)
+    * G++ (7.5.X)
 
 ### Step-by-Step
 
