@@ -20,11 +20,16 @@ for getting in touch:
 This section provides detailed instructions to help users new to our project to get everything set up and running in no time.
 
 ### Dependencies
-* No dependencies! The following dependencies is a part of the source distribution:  
-    
-    * Cmake (3.10.X)
-    * Make (4.1.X)
-    * G++ (7.5.X)
+
+We are providing a Dockerfile that will resolve all dependencies for you. In order to use Docker to build and run our project, set it up according to the instructions for your operating system:
+
+* [Docker](https://docs.docker.com/install/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+The following dependencies are a part of the source distribution:      
+* CMake (3.10.X)
+* Make (4.1.X)
+* g++ (7.5.X)
 
 ### Step-by-Step
 
@@ -32,12 +37,12 @@ With the previously listed minimal dependencies, you should be able to run our p
 
 * Create new folder using `mkdir <FolderName>` from the terminal
 * In the terminal `cd` in that folder
-* Go to gitlab and copy the SSH-Key
+* Go to our repository on GitLab and copy the [SSH-Key](git@git.chalmers.se:courses/dit638/students/group_13.git) to clone via ssh or the [webaddress](https://git.chalmers.se/courses/dit638/students/group_13/-/tree/master)
 * In the terminal, write `git clone <SSH-Key>` to clone that repo in a clean folder.
 * In the clone, there should be a docker image included to assist with the build named dockerfile.
-* Use ` docker build -t <YourCID>:latest -f Dockerfile .` to run the build. 
+* Use `docker build -t <name>:latest -f Dockerfile .` to run the build. 
     * (-t is the tag, latest means latest version, -f specifies file to run)
-* When build is complete a container has been made and to execute it you run `docker run --rm <YourCID>:latest <input>`
+* When the build is completed, a container has been created. To execute it you run `docker run --rm <name>:latest <input>` where input is the input you pass to the executable.
 
 ## Our Workflow
 
@@ -50,7 +55,7 @@ We have decided to follow these steps when adding new features to our project:
 2. Add an issue describing the sub-feature that solves part of the feature and link it to the milestone.
 3. Assign a member to the created issue.
 4. Create a feature branch that links to the issue i.e:
- ` feature / <issueDescription> - <issue-number> `.
+ `feature/<issue-number>-<issueDescription>`.
 5. Create a pull request to merge the feature branch with the `develop` branch only if the latest commit on the feature branch passes the pipeline tests.
 6. Once the code is reviewed and proved stable on `develop`, create a pull request to merge develop with `master`.
 7. Delete the feature branch and close the issue.
