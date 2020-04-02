@@ -60,3 +60,7 @@ ______
 * In case of a conflict between two members, the two will have to communicate directly to each other in a constructive manner. If the conflict is not resolved, the team should get involved to find a solution to the issue. If the team's opinion is split, the team will ask for an additional opinion outside of the team, most likely a TA, and if it still is not resolved, a random draw will be made to randomly select a solution and the team has to accept the outcome.
 
 
+#### Agreed by
+
+We have all agreed to adhere to this code of conduct and will sign this with a commit adding our names:
+Konrad Otto, 
