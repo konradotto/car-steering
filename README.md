@@ -20,10 +20,8 @@ for getting in touch:
 This section provides detailed instructions to help users new to our project to get everything set up and running in no time.
 
 ### Dependencies
-
-These dependencies are required to successfully build our project:
-
 * No dependencies! The following dependencies is a part of the source distribution:  
+    
     * Cmake (3.10.X)
     * Make (4.1.X)
     * G++ (7.5.X)
