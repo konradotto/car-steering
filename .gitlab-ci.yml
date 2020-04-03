@@ -54,7 +54,10 @@ release:
     - tags
   except:
     variables:
-      - $CI_COMMIT_TAG !=~ /^v(\d)\.(\d)\.(\d)$/
+     # - $CI_COMMIT_TAG =~ /^v(\d)\.(\d)\.(\d)$/
+     $CI_COMMIT_TAG =~ ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+r\.[[:digit:]]$
   script:
     - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG -f Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+
+
