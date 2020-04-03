@@ -58,6 +58,7 @@ release:
       - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
 
   script:
+    - docker images 
     - docker rmi --force $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG -f Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
