@@ -1,62 +1,34 @@
-# Copyright (C) 2020  Christian Berger
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##################################################
+# Section 1: Build the application
+FROM ubuntu:18.04 as builder
+MAINTAINER Jean Paul Massoud gusjeanma@student.gu.se
 
-# Which Docker image shall be used on the GitLab runner?
-image: docker:19.03.3
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get dist-upgrade -y
 
-# Details about how to connect to the Docker service to run this build.
-variables:
-  DOCKER_HOST: tcp://172.17.0.1:2375
-  DOCKER_TLS_CERTDIR: ""
+RUN apt-get install -y --no-install-recommends \
+        cmake \
+        build-essential
 
-services:
-  - name: docker:19.03.3-dind
+ADD src/ /opt/sources
+WORKDIR /opt/sources
 
-stages:
-  - build
-  - deploy
+RUN cd /opt/sources && \
+    mkdir build && \
+    cd build && \
+    cmake -D CMAKE_BUILD_TYPE=Release .. && \
+    make && make test && cp helloworld /tmp
 
-# Display information before we start the build.
-before_script:
-  - docker info
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+##################################################
+# Section 2: Bundle the application.
+FROM ubuntu:18.04
+MAINTAINER Jean Paul Massoud gusjeanma@student.gu.se
 
-# This section describes what shall be done to build and test the project.
-build-and-test:
-  tags:
-    - docker-build
-  stage: build
-  only: ['branches']
-  script:
-    - docker build -f Dockerfile .
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get dist-upgrade -y
 
-
-# This section describes what shall be done to deploy artefacts from the project.
-release:
-  tags:
-    - docker-build
-  stage: deploy
-  when: on_success
-  only:
-    refs:
-      - tags
-    variables:
-      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
-  variables:
-    IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-  script:
-    - docker build -t $IMAGE -f Dockerfile .
-    - docker push $IMAGE
-    
+WORKDIR /opt
+COPY --from=builder /tmp/helloworld .
+ENTRYPOINT ["/opt/helloworld"]
