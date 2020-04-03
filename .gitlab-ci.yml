@@ -48,7 +48,6 @@ release:
   tags:
     - docker-build
   stage: deploy
-  when: on_success
   only:
     refs:
       - tags
@@ -59,5 +58,5 @@ release:
   script:
     - docker build -t $IMAGE -f Dockerfile .
     - docker push $IMAGE
-    
+  when: on_success
     
