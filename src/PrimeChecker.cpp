@@ -13,5 +13,5 @@ bool PrimeChecker::isPrime(uint16_t n) {
             }
         }
     }
-    return false;
+    return retVal;
 }
