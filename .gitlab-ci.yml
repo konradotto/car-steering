@@ -50,6 +50,7 @@ release:
   tags:
     - docker-build
   stage: deploy
+  when: on_success
   only:
     refs:
       - tags
