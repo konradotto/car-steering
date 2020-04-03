@@ -51,10 +51,10 @@ release:
     - docker-build
   stage: deploy
   only:
-    refs: 
-      - tags
+    - tags
+  except:
     variables:
-      - $CI_COMMIT_TAG !=~ /^v([0-9]+)\.([0-9]+)\.([0-9]+)$/
+      - $CI_COMMIT_TAG !=~ /^v(\d)\.(\d)\.(\d)$/
   script:
     - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG -f Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
