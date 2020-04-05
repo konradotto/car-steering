@@ -1,5 +1,21 @@
 ## Code of conduct
 
+#### Project plan:
+
+Our project plan is closely based off the individual and group assignments given
+on Canvas:
+
+* Each group assignment is handled as a project milestone
+
+* Internal deadlines for group assignments are 7 days before the Canvas deadline this is reflected in the milestone due dates on GitLab
+
+* Milestones are split into activities that are based off the steps necessary to fulfill the assignment
+
+* Activities are distributed among team members during sprint planning
+
+* Progress is tracked through Trello (cards), GitLab (issues and milestones) and our regular communication in and outside our scheduled stand-up meetings 
+
+
 #### How do we plan to collaborate?
 * Regular meetings will be held online over discord.
 
@@ -10,15 +26,31 @@
     [Trello Board](https://trello.com/b/IhibG1ul)
 ##### Sprint schedule: 
 
-###### Tuesday: Sprint planning
+###### Tuesday: Daily stand-up and work session
 * Time: after lecture
 
-###### Thursday: Daily Scrum
+* Agenda:
+1. The members present their progress of the work item previously assigned to them.
+2. Discuss the lecture content.
+3. Ask questions (if any)
+4. Work on the taks.
+
+###### Thursday: Daily stand-up
 * Time: after lecture
 
-###### Sunday: Sprint Retrospective
-* Time: Flexible but if not announced, at 13:00.
+* Agenda:
+1. The members present their progress of the work item previously assigned to them.
+2. Reassign resources if needed.
 
+###### Sunday:  Retrospective + Sprint Planning
+* Time: Flexible, default at 13:00.
+
+* Agenda:
+1. Each member states the progress and the state of the work item assigned to them.
+2. Unforeseen difficulties shall be discussed and documented, in case they occured.    
+3. Agree on the outcome of the incoming sprint.
+4. Assign members with work items from the backlog.
+5. Discuss possible risks related to the work items (if any) and how to address them properly and efficiently.
 
 ______
 
@@ -26,6 +58,18 @@ ______
 * A kanban Trello board for visualizing work items of a sprint and their status.
 
 * Our definition of done contains that code is peer-reviewed. Individual contributions therefore need to be committed by Saturday evening to allow for other team-members to review them. This will improve code quality and ensure a general understanding of all parts of our project.
+
+The reason we include weekends in our schedule is because of the current COVID-19 pandemic situation. 
+Due to the quarantine currently happening, we thought a weekend day was alright to be allocated as well since we got nothing better to do. 
+We also would like to space out a meeting day to allow members to work on their assigned tasks to then discuss on a bigger scale what has been done those days.
+ 
+* There are multiple factors that can cause a task to be delayed, ranging from miscommunication to viruses. Due to this, there are few things we need to do to address the unexpected delays:
+    * We need to track the team progress regularly.
+    * Keep a regular communication flow.
+* On Sundays we will assign tasks that will last for a week, a Sprint. These tasks will then be progress checked on thursday where we need a small presentation of the progress: 
+    * If the progress is slow, or there are circumstances that we as a team feel will hinder achievement of this task on time, we will allocate more resources in the form of time and manpower in that one task.
+    * If the task is delayed, we need to evaluate the reason why, whether it is that the scope of that task was too big, or the effort was low etc. once identified we need to place measures to prevent this from happening again.
+
 ______
 
 #### How do we ensure knowledge transfer among our team members?
