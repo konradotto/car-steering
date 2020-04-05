@@ -63,7 +63,9 @@ The reason we include weekends in our schedule is because of the current COVID-1
 Due to the quarantine currently happening, we thought a weekend day was alright to be allocated as well since we got nothing better to do. 
 We also would like to space out a meeting day to allow members to work on their assigned tasks to then discuss on a bigger scale what has been done those days.
  
-* There are multiple factors that can cause a task to be delayed, ranging from miscommunication to viruses. Due to this, there are few things we need to do to address the unexpected delays.
+* There are multiple factors that can cause a task to be delayed, ranging from miscommunication to viruses. Due to this, there are few things we need to do to address the unexpected delays:
+    * We need to track the team progress regularly.
+    * Keep a regular communication flow.
 * On Sundays we will assign tasks that will last for a week, a Sprint. These tasks will then be progress checked on thursday where we need a small presentation of the progress: 
     * If the progress is slow, or there are circumstances that we as a team feel will hinder achievement of this task on time, we will allocate more resources in the form of time and manpower in that one task.
     * If the task is delayed, we need to evaluate the reason why, whether it is that the scope of that task was too big, or the effort was low etc. once identified we need to place measures to prevent this from happening again.
