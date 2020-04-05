@@ -1,5 +1,21 @@
 ## Code of conduct
 
+#### Project plan:
+
+Our project plan is closely based off the individual and group assignments given
+on Canvas:
+
+* Each group assignment is handled as a project milestone
+
+* Internal deadlines for group assignments are 7 days before the Canvas deadline this is reflected in the milestone due dates on GitLab
+
+* Milestones are split into activities that are based off the steps necessary to fulfill the assignment
+
+* Activities are distributed among team members during sprint planning
+
+* Progress is tracked through Trello (cards), GitLab (issues and milestones) and our regular communication in and outside our scheduled Scrum meetings 
+
+
 #### How do we plan to collaborate?
 * Regular meetings will be held online over discord.
 
