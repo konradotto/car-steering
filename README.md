@@ -1,4 +1,4 @@
-[![pipeline](https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg)]
+![pipeline](https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg)
 
 # Group 13
 
