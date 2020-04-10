@@ -1,4 +1,9 @@
-![pipeline](https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg)
+<p align="left">
+    <a href="https://git.chalmers.se/courses/dit638/students/group_13/pipelines" alt="pipeline">
+        <img src="https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg" /></a>
+    <a href="https://opensource.org/licenses/MIT" alt="License">
+        <img src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
+</p>
 
 # Group 13
 

@@ -54,7 +54,7 @@ release:
     variables:
       - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
   variables:
-    IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
+    IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   script:
     - docker build -t $IMAGE -f Dockerfile .
     - docker push $IMAGE
