@@ -1,4 +1,4 @@
-![pipeline](https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![pipeline](https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg)![License: MIT(https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 # Group 13
 
