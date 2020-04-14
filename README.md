@@ -3,6 +3,8 @@
         <img src="https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg" /></a>
     <a href="https://opensource.org/licenses/MIT" alt="License">
         <img src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
+    <a href="https://git.chalmers.se/courses/dit638/students/group_13/pipelines" alt="coverage">
+        <img src="https://gitlab.com/gitlab-org/gitlab-ce/badges/master/coverage.svg?job=coverage" /></a>
 </p>
 
 # Group 13
