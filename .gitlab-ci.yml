@@ -35,14 +35,17 @@ before_script:
 
 # This section describes what shall be done to build and test the project.
 build-and-test:
-  coverage:
   tags:
     - docker-build
   stage: build
   only: ['branches']
   script:
-    - docker build -f Dockerfile .
-    
+    - docker build -t build -f Dockerfile .
+    - docker cp build:/opt/test-coverage.xml coverage/test-coverage.xml
+  artifacts:
+    reports:
+      cobertura: coverage/test-coverage.xml
+
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:

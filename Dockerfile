@@ -26,7 +26,8 @@ RUN cd /opt/sources && \
     cd test && \
     g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage && \
-    gcovr -r . --xml-pretty
+    gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp && \
+    rm -fr * && cd .. && rm -d test
 
 
 
@@ -42,4 +43,5 @@ RUN apt-get update -y && \
 
 WORKDIR /opt
 COPY --from=builder /tmp/helloworld .
+COPY --from=builder /tmp/test-coverage.xml .
 ENTRYPOINT ["/opt/helloworld"]
