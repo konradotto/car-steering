@@ -39,6 +39,7 @@ build-and-test:
     - docker-build
   stage: build
   only: ['branches']
+  coverage: 'coverage="\d+\.\d+\%/"'
   script:
     - docker build -t build -f Dockerfile .
     - id=$(docker create build)
