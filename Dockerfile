@@ -22,12 +22,12 @@ RUN cd /opt/sources && \
     make && make test && cp helloworld /tmp
 
 RUN cd /opt/sources && \
-    mkdir test && \
+    mkdir coverage && \
     cd test && \
     g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage && \
     gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp && \
-    rm -fr * && cd .. && rm -d test
+    rm -fr * && cd .. && rm -d coverage
 
 
 

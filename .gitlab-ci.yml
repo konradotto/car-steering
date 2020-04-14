@@ -41,7 +41,9 @@ build-and-test:
   only: ['branches']
   script:
     - docker build -t build -f Dockerfile .
-    - docker cp build:/opt/test-coverage.xml $CI_PROJECT_DIR/coverage
+    - id=$(build)
+    - docker cp "${id}:/opt/test-coverage.xml" $CI_PROJECT_DIR/coverage
+    - docker rm -v "${id}"
   artifacts:
     name: test-coverage.xml
     paths:
