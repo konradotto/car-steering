@@ -41,10 +41,11 @@ build-and-test:
   only: ['branches']
   script:
     - docker build -t build -f Dockerfile .
-    - docker cp build:/opt/test-coverage.xml coverage/test-coverage.xml
+    - docker cp build:/opt/test-coverage.xml $CI_PROJECT_DIR/coverage
   artifacts:
-    reports:
-      cobertura: coverage/test-coverage.xml
+    name: test-coverage.xml
+    paths:
+    - $CI_PROJECT_DIR/coverage
 
 
 # This section describes what shall be done to deploy artefacts from the project.
