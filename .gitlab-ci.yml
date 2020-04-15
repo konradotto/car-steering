@@ -45,6 +45,8 @@ build-and-test:
     - docker cp "${id}:/opt/test-coverage.xml" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}"
   coverage: '/\d+\.\d+\%/'
+  Lines: '/s(\d+\.\d+%)\s\([^)]+\)\scovered/' #lineCoverage
+
   artifacts:
     name: test-coverage.xml
     paths:
