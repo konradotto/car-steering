@@ -46,8 +46,8 @@ build-and-test:
     - docker cp "${id}:/opt/test-coverage.xml" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}" 
   artifacts: 
-    reports:
-      cobertura: $CI_PROJECT_DIR/coverage/test-coverage.xml
+   # reports:
+   #  cobertura: $CI_PROJECT_DIR/coverage/test-coverage.xml
     name: test-coverage.xml
     paths:
     - $CI_PROJECT_DIR/coverage
