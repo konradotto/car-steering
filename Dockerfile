@@ -10,7 +10,9 @@ RUN apt-get update -y && \
 RUN apt-get install -y --no-install-recommends \
         cmake \
         build-essential \
-        gcovr 
+        gcovr \
+        ggcov \
+        lcov
 
 ADD src/ /opt/sources
 WORKDIR /opt/sources
