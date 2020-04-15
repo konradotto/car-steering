@@ -37,7 +37,7 @@ before_script:
 build-and-test:
   tags:
     - docker-build
-  coverage: '/.*/'
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
   stage: build
   only: ['branches']
   script:
@@ -46,6 +46,8 @@ build-and-test:
     - docker cp "${id}:/opt/test-coverage.xml" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}" 
   artifacts: 
+    reports:
+      cobertura: $CI_PROJECT_DIR/coverage/test-coverage.xml
     name: test-coverage.xml
     paths:
     - $CI_PROJECT_DIR/coverage
