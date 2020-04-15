@@ -51,6 +51,7 @@ build-and-test:
     name: test-coverage.xml
     paths:
     - $CI_PROJECT_DIR/coverage
+    expire_in: 30 days
 
 
 # This section describes what shall be done to deploy artefacts from the project.
