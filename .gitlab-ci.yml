@@ -45,6 +45,7 @@ build-and-test:
     - id=$(docker create build)
     - docker cp "${id}:/opt/test-coverage.xml" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}" 
+    - npx nyc --reporter cobertura gcovr
   artifacts: 
     reports:
       cobertura: $CI_PROJECT_DIR/coverage/test-coverage.xml
