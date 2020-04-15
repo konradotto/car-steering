@@ -1,8 +1,10 @@
 <p align="left">
-    <a href="https://git.chalmers.se/courses/dit638/students/group_13/pipelines" alt="pipeline">
-        <img src="https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg" /></a>
-    <a href="https://opensource.org/licenses/MIT" alt="License">
-        <img src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
+    <a href="https://git.chalmers.se/courses/dit638/students/group_13/-/commits/master">
+    <img alt="pipeline status" src="https://git.chalmers.se/courses/dit638/students/group_13/badges/master/pipeline.svg" /></a>
+    <a href="https://opensource.org/licenses/MIT" alt="license">
+        <img src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
+    <a href="https://git.chalmers.se/courses/dit638/students/group_13/-/commits/master">
+        <img alt="coverage report" src="https://git.chalmers.se/courses/dit638/students/group_13/badges/master/coverage.svg" /></a>
 </p>
 
 # Group 13
