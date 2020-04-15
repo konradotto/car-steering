@@ -26,10 +26,16 @@ RUN cd /opt/sources && \
     cd coverage && \
     g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
-    #gcovr -r . && \
-    gcovr -r . -o test-coverage.xml && cp test-coverage.xml /tmp && \
+    gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp && \
     rm -fr * && cd .. && rm -d coverage
 
+RUN cd /opt/sources && \
+    mkdir coverage && \
+    cd coverage && \
+    g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
+    ./test-coverage 5 && \
+    gcovr -r . && \
+    rm -fr * && cd .. && rm -d coverage
 
 
 ##################################################
