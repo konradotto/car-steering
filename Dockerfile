@@ -36,7 +36,7 @@ RUN cd /opt/sources && \
     cd coverage && \
     g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
-    gcov ../helloworld.cpp && gcov ../PrimeChecker.cpp &&\
+    gcov helloworld.cpp && gcov PrimeChecker.cpp &&\
     lcov --directory . --capture --output-file coverage.info &&\
     lcov --list coverage.info &&\
     rm -fr * && cd .. && rm -d coverage
