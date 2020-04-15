@@ -24,7 +24,7 @@ RUN cd /opt/sources && \
 RUN cd /opt/sources && \
     mkdir coverage && \
     cd coverage && \
-    g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
+    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
     gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp && \
     rm -fr * && cd .. && rm -d coverage
@@ -32,9 +32,11 @@ RUN cd /opt/sources && \
 RUN cd /opt/sources && \
     mkdir coverage && \
     cd coverage && \
-    g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
+    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
-    gcovr -r . && \
+    gcov ../helloworld.cpp && gcov ../PrimeChecker.cpp &&\
+    lcov --directory . --capture --output-file coverage.info &&\
+    lcov --list coverage.info &&\
     rm -fr * && cd .. && rm -d coverage
 
 
