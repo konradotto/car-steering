@@ -26,7 +26,7 @@ RUN cd /opt/sources && \
     cd coverage && \
     g++ -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
-    gcovr -r . && \
+    gcovr --json-pretty -r . && \
     gcovr -r . -o test-coverage.xml && cp test-coverage.xml /tmp && \
     rm -fr * && cd .. && rm -d coverage
 
