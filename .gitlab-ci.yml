@@ -37,7 +37,7 @@ before_script:
 build-and-test:
   tags:
     - docker-build
-  coverage:
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
   stage: build
   only: ['branches']
   script:
