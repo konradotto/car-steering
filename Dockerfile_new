@@ -45,7 +45,10 @@ RUN mkdir build && \
 
 # Second stage for packaging the software into a software bundle:
 FROM ubuntu:18.04
-MAINTAINER Christian Berger "christian.berger@gu.se"
+LABEL maintainer.first="Jean Paul Massoud" \
+      maintainer.first.email="gusjeanma@student.gu.se"
+      maintainer.second="Konrad Otto"
+      maintainer.second.email="gusottko@student.gu.se"
 
 ENV DEBIAN_FRONTEND noninteractive
 
