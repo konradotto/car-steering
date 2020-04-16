@@ -44,5 +44,5 @@ RUN apt-get update -y && \
 
 WORKDIR /opt
 COPY --from=builder /tmp/helloworld .
-COPY --from=builder /tmp/*.html .
+COPY --from=builder /tmp/*.html/ .
 ENTRYPOINT ["/opt/helloworld"]
