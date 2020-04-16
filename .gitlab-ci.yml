@@ -43,12 +43,12 @@ build-and-test:
   script:
     - docker build -t build -f Dockerfile .
     - id=$(docker create build)
-    - docker cp "${id}:/opt/test-coverage.html" $CI_PROJECT_DIR/coverage
+    - docker cp "${id}:/opt/*.html" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}" 
   artifacts: 
    # reports:
    #  cobertura: $CI_PROJECT_DIR/coverage/test-coverage.html
-    name: test-coverage.html
+#   name: test-coverage.html
     paths:
     - $CI_PROJECT_DIR/coverage
     expire_in: 30 days
