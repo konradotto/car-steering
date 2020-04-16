@@ -29,31 +29,3 @@ void ImageCropper::markPolygon(const std::vector<cv::Point> &markContour) {
 void ImageCropper::cropPolygon(const std::vector<cv::Point> &cropContour) {
     
 }
-
-std::vector<cv::Point> ImageCropper::getVehicleContour() {
-    return vehicleContourInitialized ? vehicleContour : initVehicleContour();
-}
-
-std::vector<cv::Point> ImageCropper::initVehicleContour() {
-    cv::Size imageSize = image.size();
-    vehicleContour.push_back(cv::Point(0, imageSize.height));
-    vehicleContour.push_back(cv::Point(0, 423));
-    vehicleContour.push_back(cv::Point(72, 406));
-    vehicleContour.push_back(cv::Point(72, 446));
-    vehicleContour.push_back(cv::Point(137, 426));
-    vehicleContour.push_back(cv::Point(139, 391));
-    vehicleContour.push_back(cv::Point(219, 374));
-    vehicleContour.push_back(cv::Point(266, 373));
-    vehicleContour.push_back(cv::Point(272, 362));
-    vehicleContour.push_back(cv::Point(377, 363));
-    vehicleContour.push_back(cv::Point(379, 369));
-    vehicleContour.push_back(cv::Point(430, 372));
-    vehicleContour.push_back(cv::Point(509, 397));
-    vehicleContour.push_back(cv::Point(511, 433));
-    vehicleContour.push_back(cv::Point(581, 453));
-    vehicleContour.push_back(cv::Point(581, 412));
-    vehicleContour.push_back(cv::Point(imageSize.width, 427));
-    vehicleContour.push_back(cv::Point(imageSize.width, imageSize.height));
-    vehicleContourInitialized = true;
-    return vehicleContour;
-}

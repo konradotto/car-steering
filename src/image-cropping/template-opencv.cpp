@@ -60,7 +60,9 @@ int32_t main(int32_t argc, char **argv) {
 
             ImageCropper imageCropper = ImageCropper();
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
-            
+            std::vector<cv::Point> vehicleContour;
+            initVehicleContour(vehicleContour, WIDTH, HEIGHT);
+
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
                 // OpenCV data structure to hold an image.
@@ -81,6 +83,7 @@ int32_t main(int32_t argc, char **argv) {
 
                 imageCropper.setImage(img);
                 imageCropper.cropRectangle(aboveHorizon);
+                imageCropper.cropPolygon(vehicleContour);
 
                 // Display image on your screen.
                 if (VERBOSE) {
@@ -92,5 +95,26 @@ int32_t main(int32_t argc, char **argv) {
         retCode = 0;
     }
     return retCode;
+}
+
+void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height) {
+    vehicleContour.push_back(cv::Point(0, height));
+    vehicleContour.push_back(cv::Point(0, 423));
+    vehicleContour.push_back(cv::Point(72, 406));
+    vehicleContour.push_back(cv::Point(72, 446));
+    vehicleContour.push_back(cv::Point(137, 426));
+    vehicleContour.push_back(cv::Point(139, 391));
+    vehicleContour.push_back(cv::Point(219, 374));
+    vehicleContour.push_back(cv::Point(266, 373));
+    vehicleContour.push_back(cv::Point(272, 362));
+    vehicleContour.push_back(cv::Point(377, 363));
+    vehicleContour.push_back(cv::Point(379, 369));
+    vehicleContour.push_back(cv::Point(430, 372));
+    vehicleContour.push_back(cv::Point(509, 397));
+    vehicleContour.push_back(cv::Point(511, 433));
+    vehicleContour.push_back(cv::Point(581, 453));
+    vehicleContour.push_back(cv::Point(581, 412));
+    vehicleContour.push_back(cv::Point(width, 427));
+    vehicleContour.push_back(cv::Point(width, height));
 }
 
