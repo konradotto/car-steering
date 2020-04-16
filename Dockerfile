@@ -29,7 +29,6 @@ RUN cd /opt/sources && \
     gcovr -r . && \
     gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp && \
     rm -fr * && cd .. && rm -d coverage && \
-    ls
 
 
 ##################################################
