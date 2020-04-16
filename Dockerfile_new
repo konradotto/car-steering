@@ -16,8 +16,8 @@
 # First stage for building the software:
 FROM ubuntu:18.04 as builder
 LABEL maintainer.first="Jean Paul Massoud" \
-      maintainer.first.email="gusjeanma@student.gu.se"
-      maintainer.second="Konrad Otto"
+      maintainer.first.email="gusjeanma@student.gu.se" \
+      maintainer.second="Konrad Otto" \
       maintainer.second.email="gusottko@student.gu.se"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -46,8 +46,8 @@ RUN mkdir build && \
 # Second stage for packaging the software into a software bundle:
 FROM ubuntu:18.04
 LABEL maintainer.first="Jean Paul Massoud" \
-      maintainer.first.email="gusjeanma@student.gu.se"
-      maintainer.second="Konrad Otto"
+      maintainer.first.email="gusjeanma@student.gu.se" \
+      maintainer.second="Konrad Otto" \
       maintainer.second.email="gusottko@student.gu.se"
 
 ENV DEBIAN_FRONTEND noninteractive
