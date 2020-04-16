@@ -24,6 +24,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "ImageCropper.hpp"
+
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
@@ -56,6 +58,9 @@ int32_t main(int32_t argc, char **argv) {
             // The instance od4 allows you to send and receive messages.
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
+            ImageCropper imageCropper = ImageCropper();
+            const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.45 * HEIGHT));
+            
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
                 // OpenCV data structure to hold an image.
@@ -74,9 +79,9 @@ int32_t main(int32_t argc, char **argv) {
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
                 sharedMemory->unlock();
 
-                // TODO: Do something with the frame.
-                // Example: Draw a red rectangle and display image.
-                cv::rectangle(img, cv::Point(50, 50), cv::Point(100, 100), cv::Scalar(0,0,255));
+                imageCropper.setImage(img);
+                imageCropper.markRectangle(aboveHorizon);
+                imageCropper.cropRectangle(aboveHorizon);
 
                 // Display image on your screen.
                 if (VERBOSE) {
