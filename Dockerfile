@@ -27,7 +27,7 @@ RUN cd /opt/sources && \
     g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
     gcovr -r . && \
-    gcovr -r . --html --html-details -o test-coverage.html && cp test-coverage.html /tmp && \
+    gcovr -r . --html --html-details -o *.html && cp *.html /tmp && \
     rm -fr * && cd .. && rm -d coverage
 
 
@@ -44,5 +44,5 @@ RUN apt-get update -y && \
 
 WORKDIR /opt
 COPY --from=builder /tmp/helloworld .
-COPY --from=builder /tmp/test-coverage.html .
+COPY --from=builder /tmp/*.html .
 ENTRYPOINT ["/opt/helloworld"]
