@@ -43,7 +43,7 @@ build-and-test:
   script:
     - docker build -t build -f Dockerfile .
     - id=$(docker create build)
-    - docker cp "${id}:/opt/test/*.html" $CI_PROJECT_DIR/coverage
+    - docker cp "${id}:/opt/*.html" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}" 
   artifacts: 
    # reports:
