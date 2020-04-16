@@ -32,7 +32,8 @@ RUN apt-get install -y --no-install-recommends \
         ca-certificates \
         cmake \
         build-essential \
-        libopencv-dev
+        libopencv-dev \
+        gcovr
 
 # Include this source tree and compile the sources
 ADD src/ /opt/sources
@@ -41,6 +42,16 @@ RUN mkdir build && \
     cd build && \
     cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/tmp .. && \
     make && make install && make test && cp helloworld/helloworld /tmp
+
+# Create a coverage report
+RUN mkdir coverage && cd coverage && \
+    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 \
+    ../helloworld/helloworld.cpp ../helloworld/PrimeChecker.cpp \
+    -o test-coverage && ./test-coverage 5 && \
+    gcovr -r . && \
+    gcovr -r . --xml-pretty -o test-coverage.xml && \
+    cp test-coverage.xml /tmp && \
+    rm -fr * && cd .. && rm -d coverage && ls
 
 
 # Second stage for packaging the software into a software bundle:
