@@ -12,9 +12,13 @@ class ImageCropper {
         void cropRectangle(const cv::Rect &cropRect);
         void markPolygon(const std::vector<cv::Point> &markContour);
         void cropPolygon(const std::vector<cv::Point> &cropContour);
+        std::vector<cv::Point> getVehicleContour() { return vehicleContour; };
     private:
         cv::Mat image;
         cv::Scalar markColor;
         cv::Scalar cropColor;
+        std::vector<cv::Point> vehicleContour;
+        std::vector<cv::Point> initVehicleContour();
+        bool vehicleContourInitialized;
 };
 #endif
