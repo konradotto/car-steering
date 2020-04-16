@@ -6,13 +6,11 @@
 class ImageCropper {
     public:
         ImageCropper(cv::Mat &img);
-        cv::Mat markCropAreas();
-        cv::Mat cropCropAreas();
+        void markRectangle(const cv::Rect &markRect);
+        void cropRectangle(const cv::Rect &cropRect);
+        void markPolygon(const std::vector<cv::Point> &markContour);
+        void cropPolygon(const std::vector<cv::Point> &cropContour);
     private:
         cv::Mat internalImage;
-        void markAboveHorizon();
-        void cropAboveHorizon();
-        void markCarOutlines();
-        void cropCarOutlines();
 };
 #endif
