@@ -15,7 +15,10 @@
 
 # First stage for building the software:
 FROM ubuntu:18.04 as builder
-MAINTAINER Christian Berger "christian.berger@gu.se"
+LABEL maintainer.first="Jean Paul Massoud" \
+      maintainer.first.email="gusjeanma@student.gu.se"
+      maintainer.second="Konrad Otto"
+      maintainer.second.email="gusottko@student.gu.se"
 
 ENV DEBIAN_FRONTEND noninteractive
 
