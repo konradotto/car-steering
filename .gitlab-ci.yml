@@ -43,7 +43,7 @@ build-and-test:
   script:
     - docker build -t build -f Dockerfile .
     - id=$(docker create build)
-    - docker cp "${id}:/opt/test-coverage.json" $CI_PROJECT_DIR/coverage
+    - docker cp "${id}:/opt/test-coverage.xml" $CI_PROJECT_DIR/coverage
     - docker rm -v "${id}" 
   artifacts: 
    # reports:
