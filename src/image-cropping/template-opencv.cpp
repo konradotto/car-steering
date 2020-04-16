@@ -59,7 +59,7 @@ int32_t main(int32_t argc, char **argv) {
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
             ImageCropper imageCropper = ImageCropper();
-            const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.45 * HEIGHT));
+            const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
             
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
@@ -80,7 +80,6 @@ int32_t main(int32_t argc, char **argv) {
                 sharedMemory->unlock();
 
                 imageCropper.setImage(img);
-                imageCropper.markRectangle(aboveHorizon);
                 imageCropper.cropRectangle(aboveHorizon);
 
                 // Display image on your screen.
