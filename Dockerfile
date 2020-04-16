@@ -18,7 +18,9 @@ FROM ubuntu:18.04 as builder
 LABEL maintainer.first="Jean Paul Massoud" \
       maintainer.first.email="gusjeanma@student.gu.se" \
       maintainer.second="Konrad Otto" \
-      maintainer.second.email="gusottko@student.gu.se"
+      maintainer.second.email="gusottko@student.gu.se" \
+      maintainer.third="Armin Ghoroghi" \
+      maintainer.third.email="arming@student.chalmers.se"
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -59,7 +61,9 @@ FROM ubuntu:18.04
 LABEL maintainer.first="Jean Paul Massoud" \
       maintainer.first.email="gusjeanma@student.gu.se" \
       maintainer.second="Konrad Otto" \
-      maintainer.second.email="gusottko@student.gu.se"
+      maintainer.second.email="gusottko@student.gu.se" \
+      maintainer.third="Armin Ghoroghi" \
+      maintainer.third.email="arming@student.chalmers.se"
 
 ENV DEBIAN_FRONTEND noninteractive
 
