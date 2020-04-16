@@ -23,9 +23,15 @@ void ImageCropper::cropRectangle(const cv::Rect &cropRect) {
 }
 
 void ImageCropper::markPolygon(const std::vector<cv::Point> &markContour) {
+    const cv::Point *pts = (const cv::Point*) cv::Mat(markContour).data;
+    int npts = cv::Mat(markContour).rows;
 
+    cv::polylines(image, &pts, &npts, 1, true, cropColor);
 }
 
 void ImageCropper::cropPolygon(const std::vector<cv::Point> &cropContour) {
-    
+    const cv::Point *pts = (const cv::Point*) cv::Mat(cropContour).data;
+    int npts = cv::Mat(cropContour).rows;
+
+    cv::fillPoly(image, &pts, &npts, 1, cropColor);    
 }
