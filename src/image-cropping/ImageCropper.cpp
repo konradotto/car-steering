@@ -1,9 +1,9 @@
 #include "ImageCropper.hpp"
 
-ImageCropper::ImageCropper(const cv::Scalar markColor, 
-        const cv::Scalar cropColor) {
-    this->markColor = markColor;
-    this->cropColor = cropColor;
+ImageCropper::ImageCropper(const cv::Scalar markColor_, 
+        const cv::Scalar cropColor_) {
+    markColor = markColor_;
+    cropColor = cropColor_;
 }
 
 ImageCropper::ImageCropper() {
