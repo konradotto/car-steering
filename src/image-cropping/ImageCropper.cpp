@@ -1,14 +1,17 @@
 #include "ImageCropper.hpp"
 
-ImageCropper::ImageCropper(cv::Mat &img, const cv::Scalar markColor, 
+ImageCropper::ImageCropper(const cv::Scalar markColor, 
         const cv::Scalar cropColor) {
-    image = img;
     this->markColor = markColor;
     this->cropColor = cropColor;
 }
 
-ImageCropper::ImageCropper(cv::Mat &img) {
-    ImageCropper(img, cv::Scalar(0,0,255), cv::Scalar(0,0,0)); // Red and black
+ImageCropper::ImageCropper() {
+    ImageCropper(cv::Scalar(0,0,255), cv::Scalar(0,0,0)); // Red and black
+}
+
+void ImageCropper::setImage(cv::Mat &img) {
+    image = img;
 }
 
 void ImageCropper::markRectangle(const cv::Rect &markRect) {

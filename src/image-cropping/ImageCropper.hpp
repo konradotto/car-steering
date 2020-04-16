@@ -5,8 +5,9 @@
 
 class ImageCropper {
     public:
-        ImageCropper(cv::Mat &img, const cv::Scalar markColor, const cv::Scalar cropColor);
-        ImageCropper(cv::Mat &img);
+        ImageCropper(const cv::Scalar markColor, const cv::Scalar cropColor);
+        ImageCropper();
+        void setImage(cv::Mat &img);
         void markRectangle(const cv::Rect &markRect);
         void cropRectangle(const cv::Rect &cropRect);
         void markPolygon(const std::vector<cv::Point> &markContour);
