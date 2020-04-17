@@ -47,11 +47,11 @@ build-and-test:
     - echo "$(cat $CI_PROJECT_DIR/coverage/summary.txt)"
     - docker rm -v "${id}" 
   artifacts: 
-    reports:
-      cobertura: $CI_PROJECT_DIR/coverage/test-coverage.xml
       paths:
       - $CI_PROJECT_DIR/coverage
       expire_in: 30 days
+      reports:
+        cobertura: $CI_PROJECT_DIR/coverage/test-coverage.xml
 
 
 # This section describes what shall be done to deploy artefacts from the project.
