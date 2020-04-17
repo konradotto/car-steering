@@ -9,11 +9,11 @@
 
 # Group 13
 
-## Our Project
+## Our Project:
 
 This section will eventually be used to describe what our project delivers, what our goals and use-cases are and what visions we have for its future.
 
-## Team Members
+## Team Members:
 
 Our team consists of the following 4 members.  
 Each bulletpoint also refers to 
@@ -24,11 +24,11 @@ for getting in touch:
 - Jean Paul Massoud - [jean](mailto:gusjeanma@student.gu.se)
 - Konrad Otto - [konrado](mailto:gusottko@student.gu.se)
 
-## Build Instructions
+## Build Instructions:
 
 This section provides detailed instructions to help users new to our project to get everything set up and running in no time.
 
-### Dependencies
+### Dependencies:
 
 We are providing a Dockerfile that will resolve all dependencies for you. In order to use Docker to build and run our project, set it up according to the instructions for your operating system:
 
@@ -40,7 +40,7 @@ The following dependencies are a part of the source distribution:
 * Make (4.1.X)
 * g++ (7.5.X)
 
-### Step-by-Step
+### Step-by-Step:
 
 With the previously listed minimal dependencies, you should be able to run our project by executing these steps in your terminal:
 
@@ -53,11 +53,11 @@ With the previously listed minimal dependencies, you should be able to run our p
     * (-t is the tag, latest means latest version, -f specifies file to run)
 * When the build is completed, a container has been created. To execute it you run `docker run --rm <name>:latest <input>` where input is the input you pass to the executable.
 
-## Our Workflow
+## Our Workflow:
 
 This section describes the workflow we have agreed on for both *Adding New Features* and *Fixing Bugs* with GitLab.
 
-### Adding New Features
+### Adding New Features:
 We have decided to follow these steps when adding new features to our project:
 
 1. Create a milestone representing the final feature to be implemented, and specify the time frame.
@@ -69,7 +69,7 @@ We have decided to follow these steps when adding new features to our project:
 6. Once the code is reviewed and proved stable on `develop`, create a pull request to merge develop with `master`.
 7. Delete the feature branch and close the issue.
 
-### Fixing Bugs
+### Fixing Bugs:
 
 Our workflow for fixing bugs or removing unwanted behaviour from our project consists of the following steps:
 
@@ -92,7 +92,7 @@ Our workflow for fixing bugs or removing unwanted behaviour from our project con
 6. The assignees find the root cause of the unwanted behaviour and resolve it
 
 
-## Rules for Commit Messages
+## Rules for Commit Messages:
 
 Our rules for commit messages are inspired through the articles ["How to Write a Git Commit Message"](https://chris.beams.io/posts/git-commit/) by Chris Beams and ["How to Write Good Commit Messages: A Practical Git Guide"](https://www.freecodecamp.org/news/writing-good-commit-messages-a-practical-guide/) by Bolaji Ayodeji.  
 We have written them down in accordance with the rules for their subject lines (except the 50 character limit):
@@ -110,6 +110,6 @@ We have written them down in accordance with the rules for their subject lines (
 - Capitalize all paragraphs
 - Use keywords to close, fix or resolve issues at the bottom of the body (e.g.: “Fixes: #666)
 
-## License
+## License:
 
 We decided on using the [**MIT License**](LICENSE) for open source projects.
