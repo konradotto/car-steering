@@ -50,10 +50,10 @@ RUN mkdir coverage && cd coverage && \
     g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 \
     ../helloworld/helloworld.cpp ../helloworld/PrimeChecker.cpp \
     -o test-coverage && ./test-coverage 5 && \
-    gcovr -r . && \
-    gcovr -r . --xml-pretty -o test-coverage.xml && \
-    cp test-coverage.xml /tmp && \
-    rm -fr * && cd .. && rm -d coverage && ls
+    gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && cp test-coverage.html /tmp/test && \
+    gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp/test && \
+    gcovr -r . -o summary.tt && mv summary.txt /tmp/test && \
+    rm -fr * && cd .. && rm -d coverage
 
 
 # Second stage for packaging the software into a software bundle:
