@@ -1,49 +1,83 @@
-##################################################
-# Section 1: Build the application
+# Copyright (C) 2020  Christian Berger
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# First stage for building the software:
 FROM ubuntu:18.04 as builder
-MAINTAINER Jean Paul Massoud gusjeanma@student.gu.se
+LABEL maintainer.first="Jean Paul Massoud" \
+      maintainer.first.email="gusjeanma@student.gu.se" \
+      maintainer.second="Konrad Otto" \
+      maintainer.second.email="gusottko@student.gu.se" \
+      maintainer.third="Armin Ghoroghi" \
+      maintainer.third.email="arming@student.chalmers.se"
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Upgrade the Ubuntu 18.04 LTS base image
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get dist-upgrade -y
+
+# Install the development libraries for OpenCV
+RUN apt-get install -y --no-install-recommends \
+        ca-certificates \
+        cmake \
+        build-essential \
+        libopencv-dev \
+        gcovr
+
+# Include this source tree and compile the sources
+ADD src/ /opt/sources
+WORKDIR /opt/sources
+RUN mkdir build && \
+    cd build && \
+    cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/tmp .. && \
+    make && make install && make test && cp helloworld/helloworld /tmp
+
+# Create a coverage report
+RUN mkdir coverage && cd coverage && \
+    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 \
+    ../helloworld/helloworld.cpp ../helloworld/PrimeChecker.cpp \
+    -o test-coverage && ./test-coverage 5 && \
+    gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && cp test-coverage.html /tmp/test && \
+    gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp/test && \
+    gcovr -r . -o summary.txt && cp summary.txt /tmp/test && \
+    rm -fr * && cd .. && rm -d coverage
+
+# Second stage for packaging the software into a software bundle:
+FROM ubuntu:18.04
+LABEL maintainer.first="Jean Paul Massoud" \
+      maintainer.first.email="gusjeanma@student.gu.se" \
+      maintainer.second="Konrad Otto" \
+      maintainer.second.email="gusottko@student.gu.se" \
+      maintainer.third="Armin Ghoroghi" \
+      maintainer.third.email="arming@student.chalmers.se"
+
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get dist-upgrade -y
 
 RUN apt-get install -y --no-install-recommends \
-        cmake \
-        build-essential \
-        gcovr
-
-ADD src/ /opt/sources
-WORKDIR /opt/sources
-
-RUN cd /opt/sources && \
-    mkdir build && \
-    cd build && \
-    cmake -D CMAKE_BUILD_TYPE=Release .. && \
-    make && make test && cp helloworld /tmp
-
-RUN cd /opt/sources && \
-    mkdir coverage && \
-    cd coverage && \
-    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
-    ./test-coverage 5 && \
-    gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && mv *.html /tmp/test && \
-    gcovr -r . --xml-pretty -o test-coverage.xml && mv test-coverage.xml /tmp/test && \
-    gcovr -r . -o summary.txt && mv summary.txt /tmp/test && \
-    rm -fr * && cd .. && rm -d coverage
-
-
-
-##################################################
-# Section 2: Bundle the application.
-FROM ubuntu:18.04
-MAINTAINER Jean Paul Massoud gusjeanma@student.gu.se
-
-RUN apt-get update -y && \
-    apt-get upgrade -y && \
-    apt-get dist-upgrade -y
-
+        libopencv-core3.2 \
+        libopencv-highgui3.2 \
+        libopencv-imgproc3.2 
 
 WORKDIR /opt
-COPY --from=builder /tmp/ .
-
-ENTRYPOINT ["/opt/helloworld"]
+COPY --from=builder /tmp/bin/template-opencv .
+COPY --from=builder /tmp/helloworld .
+COPY --from=builder /tmp/test/ ./test/
+# This is the entrypoint when starting the Docker container; hence, this Docker image is automatically starting our software on its creation
+ENTRYPOINT ["/opt/template-opencv"]
