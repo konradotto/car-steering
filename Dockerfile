@@ -52,9 +52,8 @@ RUN mkdir coverage && cd coverage && \
     -o test-coverage && ./test-coverage 5 && \
     gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && cp test-coverage.html /tmp/test && \
     gcovr -r . --xml-pretty -o test-coverage.xml && cp test-coverage.xml /tmp/test && \
-    gcovr -r . -o summary.tt && mv summary.txt /tmp/test && \
+    gcovr -r . -o summary.txt && cp summary.txt /tmp/test && \
     rm -fr * && cd .. && rm -d coverage
-
 
 # Second stage for packaging the software into a software bundle:
 FROM ubuntu:18.04
@@ -79,6 +78,6 @@ RUN apt-get install -y --no-install-recommends \
 WORKDIR /opt
 COPY --from=builder /tmp/bin/template-opencv .
 COPY --from=builder /tmp/helloworld .
-COPY --from=builder /tmp/test-coverage.xml .
+COPY --from=builder /tmp/test/ ./test/
 # This is the entrypoint when starting the Docker container; hence, this Docker image is automatically starting our software on its creation
 ENTRYPOINT ["/opt/template-opencv"]
