@@ -78,6 +78,6 @@ RUN apt-get install -y --no-install-recommends \
 WORKDIR /opt
 COPY --from=builder /tmp/bin/template-opencv .
 COPY --from=builder /tmp/helloworld .
-COPY --from=builder /tmp/test/ ./test/
+COPY --from=builder /tmp/ .
 # This is the entrypoint when starting the Docker container; hence, this Docker image is automatically starting our software on its creation
 ENTRYPOINT ["/opt/template-opencv"]
