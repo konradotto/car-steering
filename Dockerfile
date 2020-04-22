@@ -49,7 +49,7 @@ RUN mkdir build && \
 RUN cd /opt/sources && \
     mkdir coverage && \
     cd coverage && \
-    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld.cpp ../PrimeChecker.cpp -o test-coverage && \
+    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld/helloworld.cpp ../helloworld/PrimeChecker.cpp -o test-coverage && \
     ./test-coverage 5 && \
     gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && mv *.html /tmp/test && \
     gcovr -r . --xml-pretty -o test-coverage.xml && mv test-coverage.xml /tmp/test && \
