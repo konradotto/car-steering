@@ -26,6 +26,8 @@
 
 #include "ImageCropper.hpp"
 
+using namespace cv;
+
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
 
 int32_t main(int32_t argc, char **argv) {
@@ -86,10 +88,28 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.setImage(img);
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
+                /*
+                Mat ,nhsv,nimg,someimg[3];
+                cvtColor(img,nimg COLOR_BGR2RGB);
+                cvtColor(nimg,nhsv, COLOR_RGB2HSV);
+                split(nhsv,someimg);
+                Mat nonSat = someimg[1] < 180;
+                */
 
+                Mat hsv;
+                cvtColor(img, hsv, COLOR_BGR2HSV);
+                Mat filter,mask1,mask2,mask3,mask4,mask5,blue,yellow;
+                inRange(hsv, Scalar(100,150,0), Scalar(140,255,255), mask1);
+                inRange(hsv, Scalar(102,117,35), Scalar(145,255,255), mask5);
+                
+                blue =  mask5 + mask1; 
+                inRange(hsv, Scalar(16, 0, 69), Scalar(30, 255, 255), mask2);
+                yellow = mask2;
+                filter = blue + yellow;
+                
                 // Display image on your screen.
                 if (VERBOSE) {
-                    cv::imshow(sharedMemory->name().c_str(), img);
+                    cv::imshow(sharedMemory->name().c_str(), filter);
                     cv::waitKey(1);
                 }
             }
