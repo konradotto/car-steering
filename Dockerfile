@@ -15,12 +15,8 @@
 
 # First stage for building the software:
 FROM ubuntu:18.04 as builder
-LABEL maintainer.first="Jean Paul Massoud" \
-      maintainer.first.email="gusjeanma@student.gu.se" \
-      maintainer.second="Konrad Otto" \
-      maintainer.second.email="gusottko@student.gu.se" \
-      maintainer.third="Armin Ghoroghi" \
-      maintainer.third.email="arming@student.chalmers.se"
+LABEL maintainer="Group13" \
+      repo="https://git.chalmers.se/courses/dit638/students/group_13/-/tree/feature/14-hsv-filter"
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -59,12 +55,8 @@ RUN cd /opt/sources && \
 
 # Second stage for packaging the software into a software bundle:
 FROM ubuntu:18.04
-LABEL maintainer.first="Jean Paul Massoud" \
-      maintainer.first.email="gusjeanma@student.gu.se" \
-      maintainer.second="Konrad Otto" \
-      maintainer.second.email="gusottko@student.gu.se" \
-      maintainer.third="Armin Ghoroghi" \
-      maintainer.third.email="arming@student.chalmers.se"
+LABEL maintainer="Group13" \
+      repo="https://git.chalmers.se/courses/dit638/students/group_13/-/tree/feature/14-hsv-filter"
 
 ENV DEBIAN_FRONTEND noninteractive
 
