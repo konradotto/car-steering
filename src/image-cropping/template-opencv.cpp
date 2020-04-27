@@ -65,6 +65,12 @@ int32_t main(int32_t argc, char **argv) {
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
             ImageFilter imageFilter = ImageFilter();
+            std::pair<cv::Scalar, cv::Scalar> yellow; 
+            yellow.first=Scalar(102, 117, 35);
+            yellow.second=Scalar(145, 255, 255);
+            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges;
+            yellowRanges.push_back(yellow);
+
             ImageCropper imageCropper = ImageCropper();
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
             std::vector<cv::Point> vehicleContour;
@@ -92,6 +98,8 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
+                cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
+
                 imageFilter.applyFilters(img);
 
 
@@ -116,7 +124,7 @@ int32_t main(int32_t argc, char **argv) {
                 */
                 // Display image on your screen.
                 if (VERBOSE) {
-                    cv::imshow(sharedMemory->name().c_str(), img);
+                    cv::imshow(sharedMemory->name().c_str(), yellowImage);
                     cv::waitKey(1);
                 }
             }
