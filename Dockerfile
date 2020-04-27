@@ -25,12 +25,12 @@ LABEL maintainer.first="Jean Paul Massoud" \
 ENV DEBIAN_FRONTEND noninteractive
 
 # Upgrade the Ubuntu 18.04 LTS base image
-RUN apt-get update -y && \
+RUN apt-get update -y --fix-missing && \
     apt-get upgrade -y && \
     apt-get dist-upgrade -y
 
 # Install the development libraries for OpenCV
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get install -y -f --no-install-recommends \
         ca-certificates \
         cmake \
         build-essential \
@@ -43,7 +43,7 @@ WORKDIR /opt/sources
 RUN mkdir build && \
     cd build && \
     cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/tmp .. && \
-    make && make install && make test && cp helloworld/helloworld /tmp
+    make && make install && make test
 
 # Create a coverage report
 RUN cd /opt/sources && \
@@ -79,7 +79,6 @@ RUN apt-get install -y --no-install-recommends \
 
 WORKDIR /opt
 COPY --from=builder /tmp/bin/template-opencv .
-COPY --from=builder /tmp/helloworld .
 COPY --from=builder /tmp/ .
 # This is the entrypoint when starting the Docker container; hence, this Docker image is automatically starting our software on its creation
 ENTRYPOINT ["/opt/template-opencv"]

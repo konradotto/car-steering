@@ -16,8 +16,8 @@ private:
     pair <Scalar,Scalar> blue2;
     pair <Scalar,Scalar> yellow;
 
-    Mat applyBlue1(const Mat img,tuple<Scalar, Scalar> tuple);
-    Mat applyBlue2(const Mat img,tuple<Scalar, Scalar> tuple);
-    Mat applyYellow(const Mat img,tuple<Scalar, Scalar> tuple);
+    Mat applyBlue1(const Mat img,pair<Scalar, Scalar> pair);
+    Mat applyBlue2(const Mat img,pair<Scalar, Scalar> pair);
+    Mat applyYellow(const Mat img,pair<Scalar, Scalar> pair);
 };
 #endif

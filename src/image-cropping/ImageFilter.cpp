@@ -13,30 +13,28 @@ ImageFilter::ImageFilter() {
 void ImageFilter::applyFilters(Mat &img) {
     Mat hsv;
 
-
     cvtColor(img, hsv, COLOR_BGR2HSV);
-
-    img =applyBlue1(hsv, blue1)+applyBlue2(hsv, blue2)+applyYellow(hsv, yellow) ;
-
+    
+    img =applyBlue1(hsv, blue1)+applyBlue2(hsv, blue2)+applyYellow(hsv, yellow);
 }
 
-Mat applyBlue1(const Mat img,tuple<Scalar, Scalar> tuple){
+Mat ImageFilter::applyBlue1(const Mat img,pair<Scalar, Scalar> pair){
     Mat filter;
-    inRange(hsv, tuple.first, tuple.second,filter);
+    inRange(img, pair.first, pair.second,filter);
     return filter;
 }
 
 
-Mat applyBlue2(const Mat img,tuple<Scalar, Scalar> tuple){
+Mat ImageFilter::applyBlue2(const Mat img,pair<Scalar, Scalar> pair){
     Mat filter;
-    inRange(hsv, tuple.first, tuple.second,filter);
+    inRange(img, pair.first, pair.second,filter);
     return filter;
 }
 
 
-Mat applyYellow(const Mat img,tuple<Scalar, Scalar> tuple){
+Mat ImageFilter::applyYellow(const Mat img,pair<Scalar, Scalar> pair){
     Mat filter;
-    inRange(hsv, tuple.first, tuple.second,filter);
+    inRange(img, pair.first, pair.second,filter);
     return filter;
 }
 
