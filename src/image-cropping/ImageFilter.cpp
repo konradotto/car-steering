@@ -1,4 +1,7 @@
 #include "ImageFilter.hpp"
+#include "opencv2/opencv.hpp"
+
+
 using namespace cv;
 using namespace std;
 ImageFilter::ImageFilter() {
@@ -11,33 +14,35 @@ ImageFilter::ImageFilter() {
 }
 
 void ImageFilter::applyFilters(Mat &img) {
-    Mat hsv;
+    Mat hsv, imgYellow, imgBlue;
 
     cvtColor(img, hsv, COLOR_BGR2HSV);
+    imgYellow = applyColorFilter(hsv, yellow);
+    imgBlue = applyColorFilter(hsv,blue1) + applyColorFilter(hsv,blue2);
+    img = imgYellow + imgBlue;
+}
+
+Mat ImageFilter::filterColorRange(Mat &img, vector<pair<Scalar, Scalar>> colorRanges) {
+    // convert img to hsv-color-spectrum
+    Mat hsv, filteredImage;
+    cvtColor(img, hsv, COLOR_BGR2HSV);
+
+    // iterate over color ranges
+    bool firstIteration = true;
+    for (auto const& colorRange: colorRanges) {
+        if (firstIteration) {
+            filteredImage = applyColorFilter(hsv, colorRange);
+            firstIteration = false;
+        } else {
+            filteredImage += applyColorFilter(hsv, colorRange);
+        }
+    }
+    return filteredImage;
+}
+
+Mat ImageFilter::applyColorFilter(const Mat img, pair<Scalar, Scalar> pair){
+    Mat filtered;
+    inRange(img, pair.first, pair.second, filtered);
     
-    img =applyBlue1(hsv, blue1)+applyBlue2(hsv, blue2)+applyYellow(hsv, yellow);
+    return filtered;
 }
-
-Mat ImageFilter::applyBlue1(const Mat img,pair<Scalar, Scalar> pair){
-    Mat filter;
-    inRange(img, pair.first, pair.second,filter);
-    return filter;
-}
-
-
-Mat ImageFilter::applyBlue2(const Mat img,pair<Scalar, Scalar> pair){
-    Mat filter;
-    inRange(img, pair.first, pair.second,filter);
-    return filter;
-}
-
-
-Mat ImageFilter::applyYellow(const Mat img,pair<Scalar, Scalar> pair){
-    Mat filter;
-    inRange(img, pair.first, pair.second,filter);
-    return filter;
-}
-
-
-
-

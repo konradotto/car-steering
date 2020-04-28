@@ -9,6 +9,7 @@ public:
     ImageFilter();
     //void createFilters(const vector<Mat> filter, Mat &img);
     void applyFilters(Mat &img);
+    Mat filterColorRange(Mat &img, vector<pair<Scalar, Scalar>> colorRanges);
 
 private:
 
@@ -16,8 +17,6 @@ private:
     pair <Scalar,Scalar> blue2;
     pair <Scalar,Scalar> yellow;
 
-    Mat applyBlue1(const Mat img,pair<Scalar, Scalar> pair);
-    Mat applyBlue2(const Mat img,pair<Scalar, Scalar> pair);
-    Mat applyYellow(const Mat img,pair<Scalar, Scalar> pair);
+    Mat applyColorFilter(const Mat img,pair<Scalar, Scalar> pair);
 };
 #endif
