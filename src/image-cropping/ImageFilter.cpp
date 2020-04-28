@@ -29,6 +29,7 @@ Mat ImageFilter::filterColorRange(Mat &img, vector<pair<Scalar, Scalar>> colorRa
     for (auto const& colorRange: colorRanges) {
         if (firstIteration) {
             filteredImage = applyColorFilter(hsv, colorRange);
+            firstIteration = false;
         } else {
             filteredImage += applyColorFilter(hsv, colorRange);
         }
@@ -41,7 +42,3 @@ Mat ImageFilter::applyColorFilter(const Mat img,pair<Scalar, Scalar> pair){
     inRange(img, pair.first, pair.second,filter);
     return filter;
 }
-
-
-
-
