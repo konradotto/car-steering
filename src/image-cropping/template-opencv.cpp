@@ -67,15 +67,15 @@ int32_t main(int32_t argc, char **argv) {
             ImageFilter imageFilter = ImageFilter();
 
             std::pair<cv::Scalar, cv::Scalar> yellow, blue1, blue2; 
-            yellow.first=Scalar(102, 117, 35);
-            yellow.second=Scalar(145, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges{yellow};
-
             blue1.first=Scalar(100,150,0);
             blue1.second=Scalar(140,255,255);
-            blue2.first=Scalar(16, 0, 69);
-            blue2.second=Scalar(30, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> blueRanges{blue2};    
+            blue2.first=Scalar(102, 117, 35);
+            blue2.second=Scalar(145, 255, 255);
+            std::vector<std::pair<cv::Scalar, cv::Scalar>> blueRanges{blue1, blue2};
+
+            yellow.first=Scalar(16, 0, 69);
+            yellow.second=Scalar(30, 255, 255);
+            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges{yellow};    
 
             ImageCropper imageCropper = ImageCropper();
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
