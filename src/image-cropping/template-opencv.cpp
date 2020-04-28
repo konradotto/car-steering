@@ -23,10 +23,10 @@
 // Include the GUI and image processing header files from OpenCV
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgcodecs/imgcodecs.hpp>
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
-#include "ImageTracker.hpp"
 
 using namespace cv;
 using namespace std;
@@ -105,14 +105,25 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
-                cv::Mat yellowEdges, blueEdges;
+                cv::Mat yellowEdges, blueEdges, yellowCones, blueCones;
                 cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
                 cv::Mat blueImage = imageFilter.filterColorRange(img, blueRanges);
                 cv::Canny(yellowImage, yellowEdges, 100, 200);
                 cv::Canny(blueImage, blueEdges, 100, 200);
 
-                imageFilter.applyFilters(img);
+                cv::Mat temp;
+                temp = cv::imread("templateCone1.png", 0);
+                int method = 0;
+                cv::matchTemplate(yellowEdges, temp, yellowCones, method);
+                // cv::matchTemplate(blueEdges, temp, blueCones, method);
+                cv::normalize(yellowCones, yellowCones, 0, 1, NORM_MINMAX, -1, Mat() );
+                double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+                cv::Point matchLoc;
 
+                minMaxLoc(yellowCones, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
+                matchLoc = maxLoc;
+                cv::rectangle(yellowEdges, matchLoc, Point(matchLoc.x + temp.cols, matchLoc.y + temp.rows), cv::Scalar(255,0,0), 2, 8, 0);
+                //cv::rectangle((yellowEdges, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
                 // Display images on your screen.
                 if (VERBOSE) {
                     cv::imshow("/tmp/img/yellow", yellowEdges);
