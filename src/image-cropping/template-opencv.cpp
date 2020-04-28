@@ -65,11 +65,17 @@ int32_t main(int32_t argc, char **argv) {
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
             ImageFilter imageFilter = ImageFilter();
-            std::pair<cv::Scalar, cv::Scalar> yellow; 
+
+            std::pair<cv::Scalar, cv::Scalar> yellow, blue1, blue2; 
             yellow.first=Scalar(102, 117, 35);
             yellow.second=Scalar(145, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges;
-            yellowRanges.push_back(yellow);
+            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges{yellow};
+
+            blue1.first=Scalar(100,150,0);
+            blue1.second=Scalar(140,255,255);
+            blue2.first=Scalar(16, 0, 69);
+            blue2.second=Scalar(30, 255, 255);
+            std::vector<std::pair<cv::Scalar, cv::Scalar>> blueRanges{blue2};    
 
             ImageCropper imageCropper = ImageCropper();
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
@@ -98,13 +104,14 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
-                cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
+                //cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
+                //cv::Mat blueImage = imageFilter.filterColorRange(img, blueRanges);
 
                 imageFilter.applyFilters(img);
 
-                // Display image on your screen.
+                // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow(sharedMemory->name().c_str(), yellowImage);
+                    cv::imshow("/tmp/img", img);
                     cv::waitKey(1);
                 }
             }
