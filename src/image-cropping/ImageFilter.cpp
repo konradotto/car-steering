@@ -38,10 +38,8 @@ Mat ImageFilter::filterColorRange(Mat &img, vector<pair<Scalar, Scalar>> colorRa
 }
 
 Mat ImageFilter::applyColorFilter(const Mat img, pair<Scalar, Scalar> pair){
-    Mat mask;
-    Mat filtered(img);
-    inRange(img, pair.first, pair.second, mask);
-    bitwise_and(filtered, filtered, mask= mask);
+    Mat filtered;
+    inRange(img, pair.first, pair.second, filtered);
     
     return filtered;
 }

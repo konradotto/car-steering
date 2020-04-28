@@ -104,14 +104,15 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
-                //cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
-                //cv::Mat blueImage = imageFilter.filterColorRange(img, blueRanges);
+                cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
+                cv::Mat blueImage = imageFilter.filterColorRange(img, blueRanges);
 
                 imageFilter.applyFilters(img);
 
                 // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow("/tmp/img", img);
+                    cv::imshow("/tmp/img/yellow", yellowImage);
+                    cv::imshow("/tmp/img/blue", blueImage);
                     cv::waitKey(1);
                 }
             }
