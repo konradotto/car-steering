@@ -50,7 +50,8 @@ RUN cd /opt/sources && \
     gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && mv *.html /tmp/test && \
     gcovr -r . --xml-pretty -o test-coverage.xml && mv test-coverage.xml /tmp/test && \
     gcovr -r . -o summary.txt && mv summary.txt /tmp/test && \
-    rm -fr * && cd .. && rm -d coverage
+    rm -fr * && cd .. && rm -d coverage && \
+    cp image-cropping/templateCone1.png /tmp
 
 
 # Second stage for packaging the software into a software bundle:
@@ -67,7 +68,7 @@ RUN apt-get update -y && \
 RUN apt-get install -y --no-install-recommends \
         libopencv-core3.2 \
         libopencv-highgui3.2 \
-        libopencv-imgproc3.2 
+        libopencv-imgproc3.2
 
 WORKDIR /opt
 COPY --from=builder /tmp/bin/template-opencv .
