@@ -111,8 +111,8 @@ int32_t main(int32_t argc, char **argv) {
 
                 // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow("/tmp/img/yellow", yellowImage);
-                    cv::imshow("/tmp/img/blue", blueImage);
+                    cv::imshow("/tmp/img/yellow", yellowEdges);
+                    cv::imshow("/tmp/img/blue", blueEdges);
                     cv::waitKey(1);
                 }
             }
