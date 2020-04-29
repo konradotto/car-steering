@@ -3,16 +3,23 @@
 
 #include <utility>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgcodecs/imgcodecs.hpp>
 
 using namespace cv;
 using namespace std;
 
 class ImageTracker {
     public:
-        ImageTracker(const Mat &initialFrame);
-        void setFrame(Mat &img);
+        ImageTracker(const String templatePath, const int detectionMethod_);
+        void setTemplateImage(const String templatePath);
+        void findObjectLocation(const Mat &image, Point &bestMatch);
+        void setMethod(const int detectionMethod_);
+        int getTemplateWidth();
+        int getTemplateHeight();
 
     private:
-       // Tracker tracker;
+        cv::Mat detectionTemplate;
+        int detectionMethod;
+        bool highValuesMatchBest;
 };
 #endif
