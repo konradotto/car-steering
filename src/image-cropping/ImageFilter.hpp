@@ -5,18 +5,17 @@
 using namespace cv;
 using namespace std;
 class ImageFilter {
+
 public:
-    ImageFilter();
-    //void createFilters(const vector<Mat> filter, Mat &img);
-    void applyFilters(Mat &img);
-    Mat filterColorRange(Mat &img, vector<pair<Scalar, Scalar>> colorRanges);
-
+    static void applyFilters(Mat &img);
+    static Mat filterColorRange(const Mat &img, vector<pair<Scalar, Scalar>> colorRanges);
+    static Mat filterEdges(const Mat &img);
+    static const pair <Scalar,Scalar> blue1; 	
+    static const pair <Scalar,Scalar> blue2;
+    static const pair <Scalar,Scalar> yellow;
+    static const vector<pair<Scalar, Scalar>> blueRanges;
+    static const vector<pair<Scalar, Scalar>> yellowRanges;
 private:
-
-    pair <Scalar,Scalar> blue1;
-    pair <Scalar,Scalar> blue2;
-    pair <Scalar,Scalar> yellow;
-
-    Mat applyColorFilter(const Mat img,pair<Scalar, Scalar> pair);
+    static Mat applyColorFilter(const Mat img,pair<Scalar, Scalar> pair);
 };
 #endif
