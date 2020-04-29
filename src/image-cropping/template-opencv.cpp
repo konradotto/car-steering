@@ -27,9 +27,12 @@
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
+#include "ImageTracker.hpp"
 
 using namespace cv;
 using namespace std;
+
+const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
 
@@ -68,8 +71,8 @@ int32_t main(int32_t argc, char **argv) {
             ImageFilter imageFilter = ImageFilter();
 
             std::pair<cv::Scalar, cv::Scalar> yellow, blue1, blue2; 
-            blue1.first=Scalar(100,150,0);
-            blue1.second=Scalar(140,255,255);
+            blue1.first=Scalar(100,150, 255);
+            blue1.second=Scalar(140,255, 255);
             blue2.first=Scalar(102, 117, 35);
             blue2.second=Scalar(145, 255, 255);
             std::vector<std::pair<cv::Scalar, cv::Scalar>> blueRanges{blue1, blue2};
@@ -82,6 +85,8 @@ int32_t main(int32_t argc, char **argv) {
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
             std::vector<cv::Point> vehicleContour;
             initVehicleContour(vehicleContour, WIDTH, HEIGHT);
+
+            ImageTracker coneTracker = ImageTracker(TEMPLATE_PATH, 0);
 
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
@@ -111,19 +116,15 @@ int32_t main(int32_t argc, char **argv) {
                 cv::Canny(yellowImage, yellowEdges, 100, 200);
                 cv::Canny(blueImage, blueEdges, 100, 200);
 
-                cv::Mat temp;
-                temp = cv::imread("templateCone1.png", 0);
-                int method = 0;
-                cv::matchTemplate(yellowEdges, temp, yellowCones, method);
-                // cv::matchTemplate(blueEdges, temp, blueCones, method);
-                cv::normalize(yellowCones, yellowCones, 0, 1, NORM_MINMAX, -1, Mat() );
-                double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
-                cv::Point matchLoc;
+                cv::Point blueCone, yellowCone;
+                coneTracker.findObjectLocation(blueEdges, blueCone);
+                coneTracker.findObjectLocation(yellowEdges, yellowCone);
+                
+                int tempWidth = coneTracker.getTemplateWidth();
+                int tempHeight = coneTracker.getTemplateHeight();
+                cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
 
-                minMaxLoc(yellowCones, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
-                matchLoc = maxLoc;
-                cv::rectangle(yellowEdges, matchLoc, Point(matchLoc.x + temp.cols, matchLoc.y + temp.rows), cv::Scalar(255,0,0), 2, 8, 0);
-                //cv::rectangle((yellowEdges, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
                 // Display images on your screen.
                 if (VERBOSE) {
                     cv::imshow("/tmp/img/yellow", yellowEdges);
