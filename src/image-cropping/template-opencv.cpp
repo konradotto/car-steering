@@ -26,7 +26,7 @@
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
-#include "ImageTracker.hpp"
+//#include "ImageTracker.hpp"
 
 using namespace cv;
 using namespace std;
@@ -65,19 +65,6 @@ int32_t main(int32_t argc, char **argv) {
             // The instance od4 allows you to send and receive messages.
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
-            ImageFilter imageFilter = ImageFilter();
-
-            std::pair<cv::Scalar, cv::Scalar> yellow, blue1, blue2; 
-            blue1.first=Scalar(100,150,0);
-            blue1.second=Scalar(140,255,255);
-            blue2.first=Scalar(102, 117, 35);
-            blue2.second=Scalar(145, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> blueRanges{blue1, blue2};
-
-            yellow.first=Scalar(16, 0, 69);
-            yellow.second=Scalar(30, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges{yellow};    
-
             ImageCropper imageCropper = ImageCropper();
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
             std::vector<cv::Point> vehicleContour;
@@ -105,18 +92,13 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
-                cv::Mat yellowEdges, blueEdges;
-                cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
-                cv::Mat blueImage = imageFilter.filterColorRange(img, blueRanges);
-                cv::Canny(yellowImage, yellowEdges, 100, 200);
-                cv::Canny(blueImage, blueEdges, 100, 200);
-
-                imageFilter.applyFilters(img);
-
+                Mat yellowImage = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
+                Mat blueImage = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+              
                 // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow("/tmp/img/yellow", yellowEdges);
-                    cv::imshow("/tmp/img/blue", blueEdges);
+                    cv::imshow("/tmp/img/yellow", yellowImage);
+                    cv::imshow("/tmp/img/blue", blueImage);
                     cv::waitKey(1);
                 }
             }
