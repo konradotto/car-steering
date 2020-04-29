@@ -27,7 +27,7 @@
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
-//#include "ImageTracker.hpp"
+#include "ImageTracker.hpp"
 
 using namespace cv;
 using namespace std;

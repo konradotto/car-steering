@@ -7,7 +7,6 @@ using namespace std;
 class ImageFilter {
 
 public:
-    static void applyFilters(Mat &img);
     static Mat filterColorRange(const Mat &img, vector<pair<Scalar, Scalar>> colorRanges);
     static Mat filterEdges(const Mat &img);
     static const pair <Scalar,Scalar> blue1; 	
