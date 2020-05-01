@@ -24,7 +24,6 @@ variables:
 services:
   - name: docker:19.03.3-dind
     command: ["--experimental"]
-
 stages:
   - build
   - deploy
