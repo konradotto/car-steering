@@ -23,7 +23,7 @@ variables:
 
 services:
   - name: docker:19.03.3-dind
-    command: ["--experimental":enabled]
+    command: ["--experimental"]
 
 stages:
   - build
