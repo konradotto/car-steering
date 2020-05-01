@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this once per test-runner!
 
 #include <opencv2/imgproc/imgproc.hpp>
-#include "catch.hpp"
+#include "../assets/catch.hpp"
 #include "../src/ImageCropper.hpp"
 
 using namespace cv;
