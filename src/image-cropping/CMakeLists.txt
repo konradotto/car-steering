@@ -93,7 +93,7 @@ set(LIBRARIES ${LIBRARIES} ${OpenCV_LIBS})
 # Create executable.
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageTracker.cpp)
 
-add_executable(${PROJECT_NAME}-Tester TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageCropper.cpp)
+add_executable(${PROJECT_NAME}-Tester test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageCropper.cpp)
 add_test(NAME ${PROJECT_NAME}-Tester COMMAND ${PROJECT_NAME}-Tester)
 
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})

@@ -2,7 +2,7 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include "catch.hpp"
-#include "ImageCropper.hpp"
+#include "../ImageCropper.hpp"
 
 using namespace cv;
 using namespace std;
@@ -11,20 +11,47 @@ void cropImage(Mat &img);
 double blackRatio(const Mat &img);
 vector<Point> initVehicleContour();
 Rect aboveHorizon();
-Mat creatWhiteimage();
+Mat creatWhiteImage();
+Mat creatWhitePolyImage();
+Mat combineImages(const Mat &img1,const Mat &img2);
 
-TEST_CASE("Test ImageCropper"){
-    Mat img = creatWhiteimage();
-    SECTION("Before cropping") {
-        double expected = 0.0;
-        REQUIRE(blackRatio(img) <= expected);
-    }
-    SECTION("After cropping"){
-        double expected = 0.69;
-        cropImage(img);
-        REQUIRE(blackRatio(img) >= expected);
-    }
+
+TEST_CASE("Test ImageCropper 0."){
+    Mat img = creatWhiteImage();
+    double expected = 0.0;
+    REQUIRE(blackRatio(img) <= expected);
 }
+
+
+TEST_CASE("Test ImageCropper 1."){
+    Mat img = creatWhiteImage();
+    double expected = 0.69;
+    cropImage(img);
+    REQUIRE(blackRatio(img) >= expected);
+}
+
+TEST_CASE("Test ImageCropper 2."){
+    Mat img = creatWhiteImage();
+    double expected = 1;
+    cropImage(img);
+    Mat croppedRect = img(aboveHorizon());
+    REQUIRE(blackRatio(croppedRect) >= expected);
+}
+ 
+
+TEST_CASE("Test ImageCropper 3."){
+    Mat temp = creatWhitePolyImage();
+    Mat img = creatWhiteImage();
+    cropImage(img);
+    Mat res = combineImages(temp,img);
+    double expected = 1.0; 
+    SECTION("Test template") {
+        REQUIRE(blackRatio(temp) < expected);
+    }
+   SECTION("After cropping") {
+        REQUIRE(blackRatio(res) >= expected);
+    }
+}             
 
 void cropImage(Mat &img){
     ImageCropper imageCropper = ImageCropper();
@@ -33,17 +60,32 @@ void cropImage(Mat &img){
     imageCropper.cropPolygon(initVehicleContour());
 }
 
+Mat combineImages(const Mat &img1,const Mat &img2){
+    Mat result;
+    bitwise_and(img1, img2, result);
+    return result;
+}
 
 double blackRatio(const Mat &img) {
     int imgSize = img.rows * img.cols;
-    int nonzeros = cv::countNonZero(img);
+    int nonzeros = countNonZero(img);
     double ratio = (imgSize - nonzeros) / double(imgSize);
     return ratio;
 }
 
-Mat creatWhiteimage(){
-    Mat img = cv::Mat::zeros(Size(640,480), CV_8UC1);      
-    img = cv::Scalar(255,255,255);
+Mat creatWhiteImage(){
+    Mat img = Mat::zeros(Size(640,480), CV_8UC1);      
+    img = Scalar(255,255,255);
+    return img;
+}
+
+Mat creatWhitePolyImage(){
+    vector<Point> arr = initVehicleContour();
+    Mat img = Mat::zeros(Size(640,480), CV_8UC1);
+    img = Scalar(0,0,0);
+    const cv::Point *pts = (const cv::Point*) cv::Mat(arr).data;
+    int npts = Mat(arr).rows;
+    fillPoly(img, &pts, &npts, 1, Scalar(255,255,255)); 
     return img;
 }
 
