@@ -117,7 +117,6 @@ setup_target_for_coverage_gcovr_html(
     DEPENDENCIES coverage-reports
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
-    EXCLUDE "src/${PROJECT_NAME}.cpp"
     EXCLUDE "test/*")
 setup_target_for_coverage_gcovr_xml(
     NAME cobertura
