@@ -23,6 +23,7 @@ variables:
 
 services:
   - name: docker:19.03.3-dind
+    command: ["--experimental":enabled]
 
 stages:
   - build
@@ -32,6 +33,9 @@ stages:
 before_script:
   - docker info
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - mkdir $HOME/.docker
+  - "echo -e '{\n  \"experimental\": \"enabled\"\n}' | tee $HOME/.docker/config.json"
+  - docker version
 
 # This section describes what shall be done to build and test the project.
 build-and-test:
