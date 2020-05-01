@@ -1,9 +1,12 @@
 #ifndef IMAGEFILTER_H
 #define IMAGEFILTER_H
+
 #include <utility>
 #include <opencv2/imgproc/imgproc.hpp>
+
 using namespace cv;
 using namespace std;
+
 class ImageFilter {
 
 public:

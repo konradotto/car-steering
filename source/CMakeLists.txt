@@ -22,14 +22,13 @@ enable_testing()
 ################################################################################
 # Defining the relevant versions of OpenDLV Standard Message Set and libcluon.
 # The OpenDLV Standard Message Set contains a set of messages usually used in automotive research project.
-set(OPENDLV_STANDARD_MESSAGE_SET opendlv-standard-message-set-v0.9.6.odvd)
+set(OPENDLV_STANDARD_MESSAGE_SET assets/opendlv-standard-message-set-v0.9.6.odvd)
 # libcluon is a small and portable middleware to easily realize high-performance microservices with C++: https://github.com/chrberger/libcluon
-set(CLUON_COMPLETE cluon-complete-v0.0.127.hpp)
+set(CLUON_COMPLETE assets/cluon-complete-v0.0.127.hpp)
 
 ################################################################################
 # Set the search path for .cmake files.
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
-
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 ################################################################################
 # This project requires C++14 or newer.
 set(CMAKE_CXX_STANDARD 14)
@@ -93,19 +92,60 @@ find_package(OpenCV REQUIRED core highgui imgproc imgcodecs)
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${OpenCV_LIBS})
 
+
 ################################################################################
 # Create executable.
-add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageTracker.cpp)
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageTracker.cpp)
 
-add_executable(${PROJECT_NAME}-Tester test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ImageCropper.cpp)
+add_executable(${PROJECT_NAME}-Tester test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp)
 add_test(NAME ${PROJECT_NAME}-Tester COMMAND ${PROJECT_NAME}-Tester)
 
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 target_link_libraries(${PROJECT_NAME}-Tester ${LIBRARIES})
 
+
+################################################################################
+# Coverage configuration
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+include(CodeCoverage)
+append_coverage_compiler_flags(-O0)
+setup_target_for_coverage_gcovr_html(
+    NAME coverage-reports
+    EXECUTABLE ${PROJECT_NAME}-Tester
+    BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
+    DEPENDENCIES coverage-reports
+    EXCLUDE "build/*"
+    EXCLUDE "assets/*"
+    EXCLUDE "src/${PROJECT_NAME}.cpp"
+    EXCLUDE "test/*")
+setup_target_for_coverage_gcovr_xml(
+    NAME cobertura
+    EXECUTABLE ${PROJECT_NAME}-Tester
+    BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
+    DEPENDENCIES coverage-reports
+    EXCLUDE "build/*"
+    EXCLUDE "assets/*"
+    EXCLUDE "src/${PROJECT_NAME}.cpp"
+    EXCLUDE "test/*")
+setup_target_for_coverage_gcovr_summary(
+    NAME coverage
+    EXECUTABLE ${PROJECT_NAME}-Tester
+    BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
+    DEPENDENCIES cobertura
+    EXCLUDE "build/*"
+    EXCLUDE "assets/*"
+    EXCLUDE "src/${PROJECT_NAME}.cpp"
+    EXCLUDE "test/*")
+endif()
+
+
+
+
 # Add dependency to OpenDLV Standard Message Set.
 add_custom_target(generate_opendlv_standard_message_set_hpp DEPENDS ${CMAKE_BINARY_DIR}/opendlv-standard-message-set.hpp)
 add_dependencies(${PROJECT_NAME} generate_opendlv_standard_message_set_hpp)
+
 
 ################################################################################
 # Install executable.

@@ -34,31 +34,21 @@ RUN apt-get install -y -f --no-install-recommends \
         gcovr
 
 # Include this source tree and compile the sources
-ADD src/ /opt/sources
+ADD source/ /opt/sources
 WORKDIR /opt/sources
 RUN mkdir build && \
     cd build && \
-    cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/tmp .. && \
-    make && make install && make test && \
-    cd .. && cp templateCone1.png /tmp
-
-# Create a coverage report
-#RUN cd /opt/sources && \
-#    mkdir coverage && \
-#    cd coverage && \
-#    g++ -Wall -fprofile-arcs -ftest-coverage -fPIC -O0 ../helloworld/helloworld.cpp ../helloworld/PrimeChecker.cpp -o test-coverage && \
-#    ./test-coverage 5 && \
-#    gcovr -r . --html --html-details -o test-coverage.html && mkdir /tmp/test && mv *.html /tmp/test && \
-#    gcovr -r . --xml-pretty -o test-coverage.xml && mv test-coverage.xml /tmp/test && \
-#    gcovr -r . -o summary.txt && mv summary.txt /tmp/test && \
-#    rm -fr * && cd .. && rm -d coverage && \
-#    cp image-cropping/templateCone1.png /tmp
-
+    cmake -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=/tmp .. && \
+    make && make install && make test && make coverage && \
+    mkdir /tmp/test && cp cobertura.xml coverage.txt /tmp/test && \
+    cd coverage-reports && ls && mv *.html /tmp/test && \
+    cp ../../assets/templateCone1.png /tmp
+    
 
 # Second stage for packaging the software into a software bundle:
 FROM ubuntu:18.04
 LABEL maintainer="Group13" \
-      repo="https://git.chalmers.se/courses/dit638/students/group_13/-/tree/feature/14-hsv-filter"
+      repo="https://git.chalmers.se/courses/dit638/students/group_13/"
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -70,6 +60,7 @@ RUN apt-get install -y --no-install-recommends \
         libopencv-core3.2 \
         libopencv-highgui3.2 \
         libopencv-imgproc3.2
+
 
 WORKDIR /opt
 COPY --from=builder /tmp/bin/cyberGroup13 .

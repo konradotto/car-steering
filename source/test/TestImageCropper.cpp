@@ -2,7 +2,7 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include "catch.hpp"
-#include "../ImageCropper.hpp"
+#include "../src/ImageCropper.hpp"
 
 using namespace cv;
 using namespace std;
