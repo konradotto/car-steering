@@ -41,7 +41,7 @@ RUN mkdir build && \
     cmake -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=/tmp .. && \
     make && make install && make test && make coverage && \
     mkdir /tmp/test && cp cobertura.xml coverage.txt /tmp/test && \
-    cd coverage-reports && ls && mv *.html /tmp/test && \
+    cd coverage-reports && mv *.html /tmp/test && \
     cp ../../assets/templateCone1.png /tmp
     
 

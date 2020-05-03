@@ -110,28 +110,27 @@ target_link_libraries(${PROJECT_NAME}-Tester ${LIBRARIES})
 if(CMAKE_COMPILER_IS_GNUCXX)
 include(CodeCoverage)
 append_coverage_compiler_flags(-O0)
-setup_target_for_coverage_gcovr_html(
-    NAME coverage-reports
-    EXECUTABLE ${PROJECT_NAME}-Tester
+setup_target_for_coverage_gcovr_summary(
+    NAME coverage
     BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
-    DEPENDENCIES coverage-reports
+    DEPENDENCIES cobertura
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
+    EXCLUDE "src/${PROJECT_NAME}.cpp"
     EXCLUDE "test/*")
 setup_target_for_coverage_gcovr_xml(
     NAME cobertura
-    EXECUTABLE ${PROJECT_NAME}-Tester
     BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
     DEPENDENCIES coverage-reports
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
     EXCLUDE "src/${PROJECT_NAME}.cpp"
     EXCLUDE "test/*")
-setup_target_for_coverage_gcovr_summary(
-    NAME coverage
+setup_target_for_coverage_gcovr_html(
+    NAME coverage-reports
     EXECUTABLE ${PROJECT_NAME}-Tester
     BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
-    DEPENDENCIES cobertura
+    DEPENDENCIES coverage-reports
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
     EXCLUDE "src/${PROJECT_NAME}.cpp"
