@@ -66,12 +66,6 @@ Mat combineImages(const Mat &img1,const Mat &img2){
     return result;
 }
 
-double blackRatio(const Mat &img) {
-    int imgSize = img.rows * img.cols;
-    int nonzeros = countNonZero(img);
-    double ratio = (imgSize - nonzeros) / double(imgSize);
-    return ratio;
-}
 
 Mat creatWhiteImage(){
     Mat img = Mat::zeros(Size(640,480), CV_8UC1);      

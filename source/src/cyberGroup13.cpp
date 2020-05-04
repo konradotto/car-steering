@@ -36,6 +36,7 @@ const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
 
+
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
@@ -106,8 +107,14 @@ int32_t main(int32_t argc, char **argv) {
                 
                 int tempWidth = coneTracker.getTemplateWidth();
                 int tempHeight = coneTracker.getTemplateHeight();
-                cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
-                cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+
+
+                if (blueCone.x != 0 && blueCone.y != 0) {
+                    if (yellowCone.x != 0 && yellowCone.y != 0) {
+                        cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                    }
+                    cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                }
 
                 // Display images on your screen.
                 if (VERBOSE) {

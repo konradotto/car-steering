@@ -39,7 +39,7 @@ WORKDIR /opt/sources
 RUN mkdir build && \
     cd build && \
     cmake -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=/tmp .. && \
-    make && make install && make test && make coverage && \
+    make && make install && CTEST_OUTPUT_ON_FAILURE=TRUE make test && make coverage && \
     mkdir /tmp/coverage && cp cobertura.xml coverage.txt coverage-reports/*.html /tmp/coverage && \
     cp ../assets/templateCone1.png /tmp
     
