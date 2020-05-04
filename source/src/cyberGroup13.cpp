@@ -32,6 +32,7 @@
 using namespace cv;
 using namespace std;
 
+RNG rng(12345);
 const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
@@ -97,13 +98,20 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
+                imwrite( "/opt/cropped.png", img );
+
                 Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+
 
                 cv::Point blueCone, yellowCone;
                 coneTracker.findObjectLocation(blueEdges, blueCone);
                 coneTracker.findObjectLocation(yellowEdges, yellowCone);
                 
+                Mat detections;
+                vector<Rect> rectanglesBlue = coneTracker.detectMatches(blueEdges, detections);
+                vector<Rect> rectanglesYellow = coneTracker.detectMatches(yellowEdges, detections);
+
                 int tempWidth = coneTracker.getTemplateWidth();
                 int tempHeight = coneTracker.getTemplateHeight();
                 cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
@@ -111,8 +119,18 @@ int32_t main(int32_t argc, char **argv) {
 
                 // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow("/tmp/img/yellow", yellowEdges);
+                    
+                    for( size_t i = 0; i< rectanglesBlue.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( blueEdges, rectanglesBlue[i].tl(), rectanglesBlue[i].br(), color, 2 );
+                    }   
+                    
+                    for( size_t i = 0; i< rectanglesYellow.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( yellowEdges, rectanglesYellow[i].tl(), rectanglesYellow[i].br(), color, 2 );
+                    } 
                     cv::imshow("/tmp/img/blue", blueEdges);
+                    cv::imshow("/tmp/img/yellow", yellowEdges);
                     cv::waitKey(1);
                 }
             }
