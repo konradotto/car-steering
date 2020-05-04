@@ -2,3 +2,4 @@ build
 *.so
 export/
 .vscode
+run.sh

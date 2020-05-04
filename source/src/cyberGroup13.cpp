@@ -23,6 +23,7 @@
 // Include the GUI and image processing header files from OpenCV
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgcodecs/imgcodecs.hpp>
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
@@ -31,7 +32,10 @@
 using namespace cv;
 using namespace std;
 
+const String TEMPLATE_PATH = "templateCone1.png";
+
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
+
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
@@ -65,23 +69,12 @@ int32_t main(int32_t argc, char **argv) {
             // The instance od4 allows you to send and receive messages.
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
 
-            ImageFilter imageFilter = ImageFilter();
-
-            std::pair<cv::Scalar, cv::Scalar> yellow, blue1, blue2; 
-            blue1.first=Scalar(100,150,0);
-            blue1.second=Scalar(140,255,255);
-            blue2.first=Scalar(102, 117, 35);
-            blue2.second=Scalar(145, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> blueRanges{blue1, blue2};
-
-            yellow.first=Scalar(16, 0, 69);
-            yellow.second=Scalar(30, 255, 255);
-            std::vector<std::pair<cv::Scalar, cv::Scalar>> yellowRanges{yellow};    
-
             ImageCropper imageCropper = ImageCropper();
             const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
             std::vector<cv::Point> vehicleContour;
             initVehicleContour(vehicleContour, WIDTH, HEIGHT);
+
+            ImageTracker coneTracker = ImageTracker(TEMPLATE_PATH, 0);
 
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
@@ -105,13 +98,23 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
-                cv::Mat yellowEdges, blueEdges;
-                cv::Mat yellowImage = imageFilter.filterColorRange(img, yellowRanges);
-                cv::Mat blueImage = imageFilter.filterColorRange(img, blueRanges);
-                cv::Canny(yellowImage, yellowEdges, 100, 200);
-                cv::Canny(blueImage, blueEdges, 100, 200);
+                Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
+                Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
 
-                imageFilter.applyFilters(img);
+                cv::Point blueCone, yellowCone;
+                coneTracker.findObjectLocation(blueEdges, blueCone);
+                coneTracker.findObjectLocation(yellowEdges, yellowCone);
+                
+                int tempWidth = coneTracker.getTemplateWidth();
+                int tempHeight = coneTracker.getTemplateHeight();
+
+
+                if (blueCone.x != 0 && blueCone.y != 0) {
+                    if (yellowCone.x != 0 && yellowCone.y != 0) {
+                        cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                    }
+                    cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                }
 
                 // Display images on your screen.
                 if (VERBOSE) {
@@ -146,4 +149,3 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(width, 427));
     vehicleContour.push_back(cv::Point(width, height));
 }
-
