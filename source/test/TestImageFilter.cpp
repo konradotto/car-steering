@@ -30,7 +30,7 @@ TEST_CASE("Test ImageFilter 1."){
     SECTION("Before filtering") {
         REQUIRE(blackRatio(filterYellow(img)) >= expected);
     }
-    SECTION("Apply blue scale") {
+    SECTION("Apply yelow scale") {
         img = Scalar(60,100,100);
         expected = 0.0;
         REQUIRE(blackRatio(filterYellow(img)) <= expected);
