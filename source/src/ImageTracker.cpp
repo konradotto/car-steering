@@ -20,10 +20,10 @@ void ImageTracker::matchAndNormalize(const Mat &inputImage, Mat &outputImage) {
 }
 
 vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
-    matchAndNormalize(image, detections);
+    // matchAndNormalize(image, detections);
     Mat temp = Mat(detections);
 
-    // cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);
+    cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);
     vector<vector<Point> > contours;
     findContours( detections, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );
 
@@ -41,6 +41,45 @@ vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
     return boundRect;
 }
 
+void ImageTracker::mergeOverlappingRectangles(vector<Rect> &rectangles) {
+    cv::groupRectangles(rectangles, 1, 1);
+
+    recursiveMerge(rectangles);
+}
+
+void ImageTracker::recursiveMerge(vector<Rect> &rectangles) {
+    clog << "Size before: " << rectangles.size() << endl;
+    if (rectangles.size() < 2) {
+        return;
+    }
+    vector<Rect> mergedRectangles;
+    vector<bool> usedRectangles(rectangles.size(), false);
+    bool mergedSomething = false;
+    for (int i = 0; i < rectangles.size()-1; ++i) {
+        if (usedRectangles[i]) {
+            continue;
+        }
+        vector<Rect> overlappingRects;
+        Rect unionRects = rectangles[i];
+        for (int j = i+1; j < rectangles.size(); j++) {
+            Rect tempRect = rectangles[j];
+            if ((unionRects & tempRect).area() > 0) {
+                unionRects = unionRects | tempRect;
+                usedRectangles[j] = true;
+                mergedSomething = true;
+            }
+        }
+        mergedRectangles.push_back(unionRects);
+        usedRectangles[i] = true;        
+    }
+
+    if (!mergedSomething) {
+        return;
+    }
+    clog << "Size after: " << mergedRectangles.size() << endl;
+    rectangles = mergedRectangles;
+    recursiveMerge(rectangles);
+}
 
 void ImageTracker::findObjectLocation(const Mat &image, Point &bestMatch) {
     cv::Mat detections;

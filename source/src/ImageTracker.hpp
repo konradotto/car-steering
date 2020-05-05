@@ -6,6 +6,7 @@
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include <opencv2/objdetect.hpp>
 #include <iostream>
 
 using namespace cv;
@@ -18,6 +19,8 @@ class ImageTracker {
         void matchAndNormalize(const Mat& inputImage, Mat &outputImage);
         vector<Rect> detectMatches(const Mat &image, Mat &detections);
         void findObjectLocation(const Mat &image, Point &bestMatch);
+        void recursiveMerge(vector<Rect> &rectangles);
+        void mergeOverlappingRectangles(vector<Rect> &rectangles);
         void setMethod(const int detectionMethod_);
         int getTemplateWidth();
         int getTemplateHeight();
