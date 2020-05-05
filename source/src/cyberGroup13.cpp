@@ -32,6 +32,7 @@
 using namespace cv;
 using namespace std;
 
+RNG rng(12345);
 const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
@@ -98,42 +99,108 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
-                //filterEdges
-                Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
-                Mat orangeEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::orangeRanges));
+                //  Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+                Mat blueEdges2 = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+                Mat blueEdges3 = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+                Mat blueEdges4 = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+
+                Mat blueEdgesMatched = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+
+                //    Mat orangeEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::orangeRanges));
 
                 cv::Point blueCone, yellowCone, orangeCone;
 
                 //find the cones of this color
                 coneTracker.findObjectLocation(blueEdges, blueCone);
-                coneTracker.findObjectLocation(yellowEdges, yellowCone);
+            /*  coneTracker.findObjectLocation(yellowEdges, yellowCone);
                 coneTracker.findObjectLocation(orangeEdges, orangeCone);
+            */ 
+                Mat detections, detectionsMatched, matches;
+                vector<Rect> rectanglesBlue = coneTracker.detectMatches(blueEdges, detections);
+                coneTracker.matchAndNormalize(blueEdges, matches);
+                vector<Rect> rectanglesBlueMatched = coneTracker.detectMatches(matches, detectionsMatched);
 
+            /*  vector<Rect> rectanglesYellow = coneTracker.detectMatches(yellowEdges, detections);
+                vector<Rect> rectanglesOrange = coneTracker.detectMatches(orangeEdges, detections);
+            */
                 int tempWidth = coneTracker.getTemplateWidth();
                 int tempHeight = coneTracker.getTemplateHeight();
 
 
                 if (blueCone.x != 0 && blueCone.y != 0) {
-                    
-                    if (yellowCone.x != 0 && yellowCone.y != 0) {
-                        
-                        if (orangeCone.x != 0 && orangeCone.y != 0) {
-                            cv::rectangle(orangeEdges, orangeCone, Point(orangeCone.x + tempWidth, orangeCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
-                        }
-                        
-                        cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
-                    }
-                    
                     cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
                 }
+                /*
+                if (yellowCone.x != 0 && yellowCone.y != 0) {
+                    cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                }
+                
+                if (orangeCone.x != 0 && orangeCone.y != 0) {
+                    cv::rectangle(orangeEdges, orangeCone, Point(orangeCone.x + tempWidth, orangeCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                } */
 
                 // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow("/tmp/img/yellow", yellowEdges);
-                    cv::imshow("/tmp/img/blue", blueEdges);
-                    cv::imshow("/tmp/img/orange", orangeEdges);
+                    /*
+                    cv::groupRectangles(rectanglesBlue, 0, 10);
 
+                    for( size_t i = 0; i< rectanglesBlue.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( blueEdges, rectanglesBlue[i].tl(), rectanglesBlue[i].br(), color, 2 );   
+                    }   
+                    
+                    cv::groupRectangles(rectanglesBlue, 0, 20);
+                    cv::groupRectangles(rectanglesBlue, -1, 20);
+
+                    for( size_t i = 0; i< rectanglesBlue.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( blueEdges2, rectanglesBlue[i].tl(), rectanglesBlue[i].br(), color, 2 );   
+                    }   */
+
+                    cv::groupRectangles(rectanglesBlue, 0, 40);
+                    cv::groupRectangles(rectanglesBlue, 0, 40);
+
+                    for( size_t i = 0; i< rectanglesBlue.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( blueEdges3, rectanglesBlue[i].tl(), rectanglesBlue[i].br(), color, 2 );   
+                    }     
+
+                    cv::groupRectangles(rectanglesBlue, 0, 1000);
+                    cv::groupRectangles(rectanglesBlue, 0, 1000);
+                    coneTracker.recursiveMerge(rectanglesBlue);
+
+                    for( size_t i = 0; i< rectanglesBlue.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( blueEdges4, rectanglesBlue[i].tl(), rectanglesBlue[i].br(), color, 2 );   
+                    }  
+
+
+                    for( size_t i = 0; i< rectanglesBlueMatched.size(); i++ ) {
+                        Scalar color = cv::Scalar(150,150,0);
+                        rectangle( blueEdgesMatched, rectanglesBlueMatched[i].tl(), rectanglesBlueMatched[i].br(), color, 2 );
+                    }
+
+                    /*
+                    for( size_t i = 0; i< rectanglesYellow.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( yellowEdges, rectanglesYellow[i].tl(), rectanglesYellow[i].br(), color, 2 );
+                    } 
+
+                
+                    for( size_t i = 0; i< rectanglesOrange.size(); i++ ) {
+                        Scalar color = cv::Scalar(255,0,0);
+                        rectangle( orangeEdges, rectanglesOrange[i].tl(), rectanglesOrange[i].br(), color, 2 );
+                    } */
+
+                    //cv::imshow("/tmp/img/blue", blueEdges);
+                    //cv::imshow("/tmp/img/blue2", blueEdges2);
+                    cv::imshow("/tmp/img/blue3", blueEdges3);
+                    cv::imshow("/tmp/img/blue4", blueEdges4);
+
+                    cv::imshow("/tmp/img/blueMatched", blueEdgesMatched);
+                    // cv::imshow("/tmp/img/yellow", yellowEdges);
+                    // cv::imshow("/tmp/img/orange", orangeEdges);
                     cv::waitKey(1);
                 }
             }

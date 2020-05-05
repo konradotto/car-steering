@@ -12,11 +12,41 @@ void ImageTracker::setTemplateImage(const String templatePath) {
     detectionTemplate = cv::imread(templatePath, 0);
 }
 
+void ImageTracker::matchAndNormalize(const Mat &inputImage, Mat &outputImage) {
+    cv::matchTemplate(inputImage, detectionTemplate, outputImage, detectionMethod);
+    cv::normalize(outputImage, outputImage, 0, 1, NORM_MINMAX, -1, Mat() );
+
+    outputImage.convertTo(outputImage, CV_8UC1);
+}
+
+vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
+    matchAndNormalize(image, detections);
+    Mat temp = Mat(detections);
+
+    // cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);
+    vector<vector<Point> > contours;
+    findContours( detections, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );
+
+    vector<vector<Point> > contours_poly( contours.size() );
+    vector<Rect> boundRect( contours.size() );
+    vector<Point2f>centers( contours.size() );
+    
+    for( size_t i = 0; i < contours.size(); i++ )
+    {
+        approxPolyDP( contours[i], contours_poly[i], 3, true );
+        boundRect[i] = boundingRect( contours_poly[i] );
+    }
+
+    detections = temp;
+    return boundRect;
+}
+
+
 void ImageTracker::findObjectLocation(const Mat &image, Point &bestMatch) {
     cv::Mat detections;
     cv::matchTemplate(image, detectionTemplate, detections, detectionMethod);
     cv::normalize(detections, detections, 0, 1, NORM_MINMAX, -1, Mat() );
-    
+
     double minVal;      
     double maxVal; 
     cv::Point minLoc;
