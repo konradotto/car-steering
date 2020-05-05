@@ -1,0 +1,6 @@
+.git
+.gitlab
+.gitignore
+Dockerfile
+README.md
+export/
