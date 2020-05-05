@@ -97,7 +97,7 @@ set(LIBRARIES ${LIBRARIES} ${OpenCV_LIBS})
 # Create executable.
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageTracker.cpp)
 
-add_executable(${PROJECT_NAME}-Tester test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp)
+add_executable(${PROJECT_NAME}-Tester test/TestImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp)
 add_test(NAME ${PROJECT_NAME}-Tester COMMAND ${PROJECT_NAME}-Tester)
 
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
@@ -110,29 +110,27 @@ target_link_libraries(${PROJECT_NAME}-Tester ${LIBRARIES})
 if(CMAKE_COMPILER_IS_GNUCXX)
 include(CodeCoverage)
 append_coverage_compiler_flags(-O0)
-setup_target_for_coverage_gcovr_html(
-    NAME coverage-reports
-    EXECUTABLE ${PROJECT_NAME}-Tester
+setup_target_for_coverage_gcovr_summary(
+    NAME coverage
     BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
-    DEPENDENCIES coverage-reports
+    DEPENDENCIES cobertura
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
     EXCLUDE "src/${PROJECT_NAME}.cpp"
     EXCLUDE "test/*")
 setup_target_for_coverage_gcovr_xml(
     NAME cobertura
-    EXECUTABLE ${PROJECT_NAME}-Tester
     BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
     DEPENDENCIES coverage-reports
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
     EXCLUDE "src/${PROJECT_NAME}.cpp"
     EXCLUDE "test/*")
-setup_target_for_coverage_gcovr_summary(
-    NAME coverage
+setup_target_for_coverage_gcovr_html(
+    NAME coverage-reports
     EXECUTABLE ${PROJECT_NAME}-Tester
     BASE_DIRECTORY "CMAKE_CURRENT_SOURCE_DIR}/src"
-    DEPENDENCIES cobertura
+    DEPENDENCIES coverage-reports
     EXCLUDE "build/*"
     EXCLUDE "assets/*"
     EXCLUDE "src/${PROJECT_NAME}.cpp"

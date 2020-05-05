@@ -52,7 +52,7 @@ build-and-test:
 
     - docker build -t build -f Dockerfile .
     - id=$(docker create build)
-    - docker cp "${id}:/opt/test/" $CI_PROJECT_DIR/coverage
+    - docker cp "${id}:/opt/coverage/" $CI_PROJECT_DIR/coverage
     - echo "$(cat $CI_PROJECT_DIR/coverage/coverage.txt)"
     - docker rm -v "${id}" 
   artifacts: 
