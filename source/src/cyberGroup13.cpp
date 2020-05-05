@@ -98,21 +98,33 @@ int32_t main(int32_t argc, char **argv) {
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
 
+                //filterEdges
                 Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
+                Mat orangeEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::orangeRanges));
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
 
-                cv::Point blueCone, yellowCone;
+                cv::Point blueCone, yellowCone, orangeCone;
+
+                //find the cones of this color
                 coneTracker.findObjectLocation(blueEdges, blueCone);
                 coneTracker.findObjectLocation(yellowEdges, yellowCone);
-                
+                coneTracker.findObjectLocation(orangeEdges, orangeCone);
+
                 int tempWidth = coneTracker.getTemplateWidth();
                 int tempHeight = coneTracker.getTemplateHeight();
 
 
                 if (blueCone.x != 0 && blueCone.y != 0) {
+                    
                     if (yellowCone.x != 0 && yellowCone.y != 0) {
+                        
+                        if (orangeCone.x != 0 && orangeCone.y != 0) {
+                            cv::rectangle(orangeEdges, orangeCone, Point(orangeCone.x + tempWidth, orangeCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
+                        }
+                        
                         cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
                     }
+                    
                     cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
                 }
 
@@ -120,6 +132,8 @@ int32_t main(int32_t argc, char **argv) {
                 if (VERBOSE) {
                     cv::imshow("/tmp/img/yellow", yellowEdges);
                     cv::imshow("/tmp/img/blue", blueEdges);
+                    cv::imshow("/tmp/img/orange", orangeEdges);
+
                     cv::waitKey(1);
                 }
             }
