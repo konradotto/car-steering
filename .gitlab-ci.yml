@@ -58,7 +58,7 @@ build-and-test:
   stage: build
   only: ['branches']
   script:
-    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE}:${CI_COMMIT_SHA} --push "."
+    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --push "."
     - docker run --rm ${IMAGE}:${CI_COMMIT_SHA} ${TEST_CMD}
     - docker tag ${IMAGE}:${CI_COMMIT_SHA} ${IMAGE}:latest
     - docker push ${IMAGE}:latest
