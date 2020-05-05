@@ -15,6 +15,7 @@ class ImageTracker {
     public:
         ImageTracker(const String templatePath, const int detectionMethod_);
         void setTemplateImage(const String templatePath);
+        void matchAndNormalize(const Mat& inputImage, Mat &outputImage);
         vector<Rect> detectMatches(const Mat &image, Mat &detections);
         void findObjectLocation(const Mat &image, Point &bestMatch);
         void setMethod(const int detectionMethod_);

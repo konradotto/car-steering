@@ -12,14 +12,17 @@ void ImageTracker::setTemplateImage(const String templatePath) {
     detectionTemplate = cv::imread(templatePath, 0);
 }
 
-vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
-    cv::matchTemplate(image, detectionTemplate, detections, detectionMethod);
-    cv::normalize(detections, detections, 0, 1, NORM_MINMAX, -1, Mat() );
-    
-    cv::Mat temp = cv::Mat(detections);
+void ImageTracker::matchAndNormalize(const Mat &inputImage, Mat &outputImage) {
+    cv::matchTemplate(inputImage, detectionTemplate, outputImage, detectionMethod);
+    cv::normalize(outputImage, outputImage, 0, 1, NORM_MINMAX, -1, Mat() );
 
-    detections.convertTo(detections, CV_8UC1);
-    
+    outputImage.convertTo(outputImage, CV_8UC1);
+}
+
+vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
+    matchAndNormalize(image, detections);
+    Mat temp = Mat(detections);
+
     // cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);
     vector<vector<Point> > contours;
     findContours( detections, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );
