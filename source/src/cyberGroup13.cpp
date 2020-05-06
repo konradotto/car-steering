@@ -32,6 +32,7 @@
 using namespace cv;
 using namespace std;
 
+RNG rng(12345);
 const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
@@ -101,25 +102,27 @@ int32_t main(int32_t argc, char **argv) {
                 Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
 
-                cv::Point blueCone, yellowCone;
-                coneTracker.findObjectLocation(blueEdges, blueCone);
-                coneTracker.findObjectLocation(yellowEdges, yellowCone);
-                
-                int tempWidth = coneTracker.getTemplateWidth();
-                int tempHeight = coneTracker.getTemplateHeight();
-
-
-                if (blueCone.x != 0 && blueCone.y != 0) {
-                    if (yellowCone.x != 0 && yellowCone.y != 0) {
-                        cv::rectangle(yellowEdges, yellowCone, Point(yellowCone.x + tempWidth, yellowCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
-                    }
-                    cv::rectangle(blueEdges, blueCone, Point(blueCone.x + tempWidth, blueCone.y + tempHeight), cv::Scalar(255,0,0), 2, 8, 0);
-                }
+                cv::Point blueCone, yellowCone, orangeCone;
 
                 // Display images on your screen.
                 if (VERBOSE) {
-                    cv::imshow("/tmp/img/yellow", yellowEdges);
-                    cv::imshow("/tmp/img/blue", blueEdges);
+
+                    Scalar color = cv::Scalar(255,0,0);
+                    vector<Rect> rectBlue, rectYellow;
+
+                    coneTracker.setMinRectArea(75);
+                    coneTracker.run(blueEdges, rectBlue);
+                    coneTracker.run(yellowEdges, rectYellow);
+                    
+                    for( size_t i = 0; i < rectBlue.size(); i++ ) {
+                        rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
+                    }                     
+                    
+                    color = cv::Scalar(255,255,0);
+                    for( size_t i = 0; i < rectYellow.size(); i++ ) {
+                        rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
+                    } 
+                    cv::imshow("/tmp/img/full", img);
                     cv::waitKey(1);
                 }
             }

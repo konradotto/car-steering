@@ -12,12 +12,18 @@ class ImageFilter {
 public:
     static Mat filterColorRange(const Mat &img, vector<pair<Scalar, Scalar>> colorRanges);
     static Mat filterEdges(const Mat &img);
+    
     static const pair <Scalar,Scalar> blue1; 	
     static const pair <Scalar,Scalar> blue2;
     static const pair <Scalar,Scalar> yellow;
+    static const pair <Scalar,Scalar> orange;
+
     static const vector<pair<Scalar, Scalar>> blueRanges;
     static const vector<pair<Scalar, Scalar>> yellowRanges;
+    static const vector<pair<Scalar, Scalar>> orangeRanges;
+
 private:
     static Mat applyColorFilter(const Mat img,pair<Scalar, Scalar> pair);
 };
+
 #endif
