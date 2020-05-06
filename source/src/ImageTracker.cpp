@@ -3,9 +3,11 @@
 using namespace cv;
 using namespace std;
 
-ImageTracker::ImageTracker(const String templatePath, const int detectionMethod_) {
+ImageTracker::ImageTracker(const String templatePath, const int detectionMethod_, const int minRectArea_, const int maxRectArea_) {
     setTemplateImage(templatePath);
     setMethod(detectionMethod_);
+    setMinRectArea(minRectArea_);
+    setMaxRectArea(maxRectArea_);
 }
 
 void ImageTracker::setTemplateImage(const String templatePath) {
@@ -20,7 +22,6 @@ void ImageTracker::matchAndNormalize(const Mat &inputImage, Mat &outputImage) {
 }
 
 vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
-    // matchAndNormalize(image, detections);
     Mat temp = Mat(detections);
 
     cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);
@@ -42,13 +43,11 @@ vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
 }
 
 void ImageTracker::mergeOverlappingRectangles(vector<Rect> &rectangles) {
-    cv::groupRectangles(rectangles, 1, 1);
-
+    cv::groupRectangles(rectangles, 0, 1000);
     recursiveMerge(rectangles);
 }
 
 void ImageTracker::recursiveMerge(vector<Rect> &rectangles) {
-    clog << "Size before: " << rectangles.size() << endl;
     if (rectangles.size() < 2) {
         return;
     }
@@ -76,9 +75,48 @@ void ImageTracker::recursiveMerge(vector<Rect> &rectangles) {
     if (!mergedSomething) {
         return;
     }
-    clog << "Size after: " << mergedRectangles.size() << endl;
     rectangles = mergedRectangles;
     recursiveMerge(rectangles);
+}
+
+void ImageTracker::filterRectsByArea(vector<Rect> &rectangles, int minArea, int maxArea) {
+    // temporary array to store the results
+    vector<Rect> workingArray;
+
+    // iterate the input array and add those with enough area to 
+    for (Rect rect: rectangles) {
+        if (rect.area() >= minArea && rect.area() <= maxArea) {
+            workingArray.push_back(rect);
+        }
+    }
+
+    // return all rectangles in the workingArray 
+    rectangles = workingArray;
+}
+
+void ImageTracker::filterRectsByDimensions(vector<Rect> &rectangles, const double widthToHeightRatio) {
+    vector<Rect> rectanglesOut;
+    for (Rect rect: rectangles) {
+        bool goodDimensions = rect.width < widthToHeightRatio*rect.height;
+
+        if (goodDimensions) {
+            rectanglesOut.push_back(rect);
+        }
+    }
+
+    rectangles = rectanglesOut;    
+}
+
+void ImageTracker::run(const Mat &image, vector<Rect> &rectangles) {
+    Mat detections;
+    vector<Rect> matches;
+    matches = detectMatches(image, detections);
+    
+    mergeOverlappingRectangles(matches);
+    filterRectsByArea(matches, minRectArea, maxRectArea);
+    filterRectsByDimensions(matches);
+
+    rectangles = matches;
 }
 
 void ImageTracker::findObjectLocation(const Mat &image, Point &bestMatch) {
@@ -118,4 +156,17 @@ int ImageTracker::getTemplateHeight() {
     return detectionTemplate.rows;
 }
 
-
+void ImageTracker::setMinRectArea(const int minRectArea_) {
+    if (minRectArea_ > 0) {
+        minRectArea = minRectArea_;
+    } else {
+        minRectArea = 0;
+    }
+}
+void ImageTracker::setMaxRectArea(const int maxRectArea_) {
+    if (maxRectArea_ > minRectArea) {
+        maxRectArea = maxRectArea_;
+    } else {
+        maxRectArea = 5000;
+    }
+}
