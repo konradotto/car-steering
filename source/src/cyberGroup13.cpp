@@ -28,6 +28,9 @@
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
 #include "ImageTracker.hpp"
+#include "CsvManager.hpp"
+
+
 
 using namespace cv;
 using namespace std;
@@ -77,6 +80,19 @@ int32_t main(int32_t argc, char **argv) {
 
             ImageTracker coneTracker = ImageTracker(TEMPLATE_PATH, 0);
 
+            CsvManager::refresh();  //clean the directory & create a csv file
+
+            opendlv::proxy::GroundSteeringRequest gsr;
+            mutex gsrMutex;
+            auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
+                // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
+                // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
+                lock_guard<std::mutex> lck(gsrMutex);
+                gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+            };
+            od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+
+
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
                 // OpenCV data structure to hold an image.
@@ -93,8 +109,9 @@ int32_t main(int32_t argc, char **argv) {
                     img = wrapped.clone();
                 }
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
+                uint32_t ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
                 sharedMemory->unlock();
-
+                
                 imageCropper.setImage(img);
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
@@ -103,6 +120,9 @@ int32_t main(int32_t argc, char **argv) {
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
 
                 cv::Point blueCone, yellowCone, orangeCone;
+
+                //Here we log the data to the csv file
+                CsvManager::add(ts, gsr.groundSteering(), 0.5);
 
                 // Display images on your screen.
                 if (VERBOSE) {
