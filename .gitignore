@@ -3,4 +3,4 @@ build
 export/
 csv/
 .vscode
-run.sh
+.sh
