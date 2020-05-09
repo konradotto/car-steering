@@ -95,13 +95,13 @@ set(LIBRARIES ${LIBRARIES} ${OpenCV_LIBS})
 
 ################################################################################
 # Create executable.
-add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageTracker.cpp)
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageTracker.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/CsvManager.cpp)
 
-add_executable(${PROJECT_NAME}-Tester test/TestImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp)
-add_test(NAME ${PROJECT_NAME}-Tester COMMAND ${PROJECT_NAME}-Tester)
+#add_executable(${PROJECT_NAME}-Tester test/TestImageFilter.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageFilter.cpp test/TestImageCropper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageCropper.cpp)
+#add_test(NAME ${PROJECT_NAME}-Tester COMMAND ${PROJECT_NAME}-Tester)
 
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
-target_link_libraries(${PROJECT_NAME}-Tester ${LIBRARIES})
+#target_link_libraries(${PROJECT_NAME}-Tester ${LIBRARIES})
 
 
 ################################################################################
