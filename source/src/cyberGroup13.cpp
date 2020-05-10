@@ -24,6 +24,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
+#include <math.h>
+#define PI 3.14159265
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
@@ -39,6 +41,8 @@ RNG rng(12345);
 const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
+Point calcPoint(Rect rect);
+double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones);
 
 
 int32_t main(int32_t argc, char **argv) {
@@ -121,19 +125,95 @@ int32_t main(int32_t argc, char **argv) {
 
                 cv::Point blueCone, yellowCone, orangeCone;
 
-                //Here we log the data to the csv file
-                CsvManager::add(ts, gsr.groundSteering(), 0.5);
-
+                
                 // Display images on your screen.
                 if (VERBOSE) {
 
                     Scalar color = cv::Scalar(255,0,0);
                     vector<Rect> rectBlue, rectYellow;
-
                     coneTracker.setMinRectArea(75);
                     coneTracker.run(blueEdges, rectBlue);
                     coneTracker.run(yellowEdges, rectYellow);
+//                    if (rectBlue.size() > 1 && rectYellow.size() > 1){
+//                        std::vector<cv::Point> leftPoints = {calcPoint(rectBlue[0]),calcPoint(rectBlue[1])};
+//                        std::vector<cv::Point> rightPoints = {calcPoint(rectYellow[0]),calcPoint(rectYellow[1])};
+//                        //cout << "left points >>>\n" << leftPoints << endl;
+//                        //cout << "right points >>>\n" << rightPoints << endl;
+//
+//                        double gsr1 = getSteeringAngle(leftPoints,rightPoints);
+//                        //Here we log the data to the csv file
+//                        CsvManager::add(ts, gsr.groundSteering(), gsr1);
+//                        x = 1;
+//
+//                    }
+                    std::vector<cv::Point> yPoints,bPoints;
+                    for (size_t k = 0; k<rectYellow.size(); k++){
+                        yPoints.push_back(calcPoint(rectYellow[k]));
+                    }
+                    for (size_t j=0;j<rectBlue.size();j++){
+                        bPoints.push_back(calcPoint(rectBlue[j]));
+                    }
+                    blueEdges = Scalar(0,0,0);
+                    polylines(blueEdges,bPoints,false,Scalar(255,255,255),2,150,0);
+                    yellowEdges = Scalar(0,0,0);
+                    polylines(yellowEdges,yPoints,false,Scalar(255,255,255),2,150,0);
                     
+                    vector<Vec4i> ylines;
+                    HoughLinesP(yellowEdges, ylines, 1, CV_PI/180, 10, 5, 10);
+                    for( size_t i = 0; i < ylines.size(); i++ )
+                    {
+                        line( img, Point(ylines[i][0], ylines[i][1]),
+                            Point(ylines[i][2], ylines[i][3]), Scalar(0,0,255), 3, 8 );
+                    }
+                    vector<Vec4i> blines;
+                    HoughLinesP(blueEdges, blines, 1, CV_PI/180, 10, 5, 10);
+                    for( size_t i = 0; i < blines.size(); i++ )
+                    {
+                        line( img, Point(blines[i][0], blines[i][1]),
+                            Point(blines[i][2], blines[i][3]), Scalar(0,0,255), 3, 8 );
+                    }
+
+                    Mat res;
+                    bitwise_or(blueEdges,yellowEdges,res);
+                    if (blines.size()>0 && ylines.size()>0){
+                        std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
+                        std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
+                        double gr1 = getSteeringAngle(leftPoints,rightPoints);
+                        CsvManager::add(ts, gsr.groundSteering(), gr1);
+                    }
+                    
+
+                    //int x = (blines.size()>0 && ylines.size()>0)?1:(blines.size()>0)?2:(ylines.size()>0)?3:0;
+                    //int x_offset , y_offset, b_x2, y_x2,x1,x2;
+                    //int mid = 320;
+                    //y_offset = 340;
+                    //switch (x)
+                    //{
+                    //case 1:
+                    //    b_x2 = blines[0][2];
+                    //    y_x2 = ylines[0][2];
+                    //    x_offset = (b_x2 + y_x2) / 2 - mid;
+                    //    break;
+                    //case 2:
+                    //    x1 = blines[0][0];
+                    //    x2 = blines[0][2];
+                    //    x_offset = x2 - x1;
+                    //    break;
+                    //case 3:
+                    //    x1 = ylines[0][0];
+                    //    x2 = ylines[0][2];
+                    //    x_offset = x2 - x1;
+                    //    break;
+                    //default:
+                    //    break;
+                    //}
+                    //if(x){
+                    //double angle_to_mid_radian = atan(x_offset / y_offset);  //# angle (in radian) to center vertical line
+                    //double angle_to_mid_deg = angle_to_mid_radian * 180.0 / PI;  //# angle (in degrees) to center vertical line
+                    //CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_deg);
+                    //}
+
+                    /*
                     for( size_t i = 0; i < rectBlue.size(); i++ ) {
                         rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
                     }                     
@@ -142,6 +222,10 @@ int32_t main(int32_t argc, char **argv) {
                     for( size_t i = 0; i < rectYellow.size(); i++ ) {
                         rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
                     } 
+                    */
+
+                    cv::imshow("/tmp/img/bimg", res);
+                   // cv::imshow("/tmp/img/yimg", yimg);
                     cv::imshow("/tmp/img/full", img);
                     cv::waitKey(1);
                 }
@@ -171,4 +255,26 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(581, 412));
     vehicleContour.push_back(cv::Point(width, 427));
     vehicleContour.push_back(cv::Point(width, height));
+}
+
+double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
+{
+    double leftSlope=(double)(leftCones[1].y-leftCones[0].y)/(double)(leftCones[1].x-leftCones[0].x);
+    //The line format: Y=leftSlope*(X-X0)+X0
+    double rightSlope=(double)(rightCones[1].y-rightCones[0].y)/(double)(rightCones[1].x-rightCones[0].x);
+    //The line format: Y=rightSlope*(X-X0)+X0
+    int middleOfTheCar=320;//I don't know the proper number yet
+    int horizion=340;//I don't know the proper number yet
+    double leftLaneIntersection=leftSlope*(middleOfTheCar-leftCones[0].x)+leftCones[0].x;
+    double rightLaneIntersection=rightSlope*(middleOfTheCar-rightCones[0].x)+rightCones[0].x;
+    if(leftLaneIntersection>horizion||rightLaneIntersection>horizion)
+        if(leftLaneIntersection>rightLaneIntersection)
+            return -leftLaneIntersection*0.0005;
+        else
+            return rightLaneIntersection*0.0005;
+    return 0;
+}
+
+Point calcPoint(Rect rect){
+    return (rect.br() + rect.tl()) * 0.5;
 }
