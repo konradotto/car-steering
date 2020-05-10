@@ -134,18 +134,7 @@ int32_t main(int32_t argc, char **argv) {
                     coneTracker.setMinRectArea(75);
                     coneTracker.run(blueEdges, rectBlue);
                     coneTracker.run(yellowEdges, rectYellow);
-//                    if (rectBlue.size() > 1 && rectYellow.size() > 1){
-//                        std::vector<cv::Point> leftPoints = {calcPoint(rectBlue[0]),calcPoint(rectBlue[1])};
-//                        std::vector<cv::Point> rightPoints = {calcPoint(rectYellow[0]),calcPoint(rectYellow[1])};
-//                        //cout << "left points >>>\n" << leftPoints << endl;
-//                        //cout << "right points >>>\n" << rightPoints << endl;
-//
-//                        double gsr1 = getSteeringAngle(leftPoints,rightPoints);
-//                        //Here we log the data to the csv file
-//                        CsvManager::add(ts, gsr.groundSteering(), gsr1);
-//                        x = 1;
-//
-//                    }
+                    
                     std::vector<cv::Point> yPoints,bPoints;
                     for (size_t k = 0; k<rectYellow.size(); k++){
                         yPoints.push_back(calcPoint(rectYellow[k]));
@@ -159,50 +148,81 @@ int32_t main(int32_t argc, char **argv) {
                     polylines(yellowEdges,yPoints,false,Scalar(255,255,255),2,150,0);
                     
                     vector<Vec4i> ylines;
-                    HoughLinesP(yellowEdges, ylines, 1, CV_PI/180, 10, 5, 10);
+                    HoughLinesP(yellowEdges, ylines, 1, CV_PI/180, 10, 10, 50);
                     for( size_t i = 0; i < ylines.size(); i++ )
                     {
-                        line( img, Point(ylines[i][0], ylines[i][1]),
-                            Point(ylines[i][2], ylines[i][3]), Scalar(0,0,255), 3, 8 );
+                        line( img, Point(ylines[0][0], ylines[0][1]),
+                            Point(ylines[0][2], ylines[0][3]), Scalar(0,0,255), 3, 8 );
+                            break;
                     }
                     vector<Vec4i> blines;
-                    HoughLinesP(blueEdges, blines, 1, CV_PI/180, 10, 5, 10);
+                    HoughLinesP(blueEdges, blines, 1, CV_PI/180, 10, 10, 50);
                     for( size_t i = 0; i < blines.size(); i++ )
                     {
-                        line( img, Point(blines[i][0], blines[i][1]),
-                            Point(blines[i][2], blines[i][3]), Scalar(0,0,255), 3, 8 );
+                        line( img, Point(blines[0][0], blines[0][1]),
+                            Point(blines[0][2], blines[0][3]), Scalar(0,0,255), 3, 8 );
+                            break;
                     }
+                    line( img, Point(320, 290),
+                            Point(320, 362), Scalar(0,255,255), 3, 8 );
 
-                    Mat res;
-                    bitwise_or(blueEdges,yellowEdges,res);
-                    if (blines.size()>0 && ylines.size()>0){
+
+                    if (blines.size() > 1 && ylines.size() > 1){
                         std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
                         std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
-                        double gr1 = getSteeringAngle(leftPoints,rightPoints);
-                        CsvManager::add(ts, gsr.groundSteering(), gr1);
+                        //cout << "left points >>>\n" << leftPoints << endl;
+                        //cout << "right points >>>\n" << rightPoints << endl;
+
+                        double gsr1 = getSteeringAngle(leftPoints,rightPoints);
+                        //Here we log the data to the csv file
+                        CsvManager::add(ts, gsr.groundSteering(), gsr1,"1");
+
                     }
+                    else{
+                        CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
+                    }
+
+                    //if (blines.size()>0 && ylines.size()>0){
+                    //    std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
+                    //    std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
+                    //    double gr1 = getSteeringAngle(leftPoints,rightPoints);
+                    //    CsvManager::add(ts, gsr.groundSteering(), gr1);
+                    //}
                     
 
                     //int x = (blines.size()>0 && ylines.size()>0)?1:(blines.size()>0)?2:(ylines.size()>0)?3:0;
-                    //int x_offset , y_offset, b_x2, y_x2,x1,x2;
+                    //int x_offset , y_offset, b_x2, y_x2,x1,x2,y1,y2;
                     //int mid = 320;
-                    //y_offset = 340;
+                    //y_offset = 70;
                     //switch (x)
                     //{
                     //case 1:
+                    //    cout << "case 1" << endl;
+                    //    cout << "yellow line at: " << ylines[0] << endl;
+                    //    cout << "bluline at: " << blines[0] << endl;
                     //    b_x2 = blines[0][2];
                     //    y_x2 = ylines[0][2];
                     //    x_offset = (b_x2 + y_x2) / 2 - mid;
                     //    break;
                     //case 2:
+                    //    cout << "case 2" << endl;
+                    //    cout << "bluline at: " << blines[0] << endl;
                     //    x1 = blines[0][0];
                     //    x2 = blines[0][2];
+                    //    y1 = blines[0][1];
+                    //    y2 = blines[0][3];
                     //    x_offset = x2 - x1;
+                    //    //y_offset = y2 - y1;
                     //    break;
                     //case 3:
+                    //    cout << "case 3" << endl;
+                    //    cout << "yellow line at: " << ylines[0] << endl;
                     //    x1 = ylines[0][0];
                     //    x2 = ylines[0][2];
+                    //    y1 = ylines[0][1];
+                    //    y2 = ylines[0][3];
                     //    x_offset = x2 - x1;
+                    //   // y_offset = y2 - y1;
                     //    break;
                     //default:
                     //    break;
@@ -210,8 +230,12 @@ int32_t main(int32_t argc, char **argv) {
                     //if(x){
                     //double angle_to_mid_radian = atan(x_offset / y_offset);  //# angle (in radian) to center vertical line
                     //double angle_to_mid_deg = angle_to_mid_radian * 180.0 / PI;  //# angle (in degrees) to center vertical line
-                    //CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_deg);
+                    //CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_radian * 0.1, to_string(x));
                     //}
+                    //else {
+                    //    CsvManager::add(ts, gsr.groundSteering(), 0.0, "0");
+                    //}
+                    
 
                     /*
                     for( size_t i = 0; i < rectBlue.size(); i++ ) {
@@ -224,8 +248,6 @@ int32_t main(int32_t argc, char **argv) {
                     } 
                     */
 
-                    cv::imshow("/tmp/img/bimg", res);
-                   // cv::imshow("/tmp/img/yimg", yimg);
                     cv::imshow("/tmp/img/full", img);
                     cv::waitKey(1);
                 }
@@ -264,7 +286,7 @@ double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
     double rightSlope=(double)(rightCones[1].y-rightCones[0].y)/(double)(rightCones[1].x-rightCones[0].x);
     //The line format: Y=rightSlope*(X-X0)+X0
     int middleOfTheCar=320;//I don't know the proper number yet
-    int horizion=340;//I don't know the proper number yet
+    int horizion=70;//I don't know the proper number yet
     double leftLaneIntersection=leftSlope*(middleOfTheCar-leftCones[0].x)+leftCones[0].x;
     double rightLaneIntersection=rightSlope*(middleOfTheCar-rightCones[0].x)+rightCones[0].x;
     if(leftLaneIntersection>horizion||rightLaneIntersection>horizion)
