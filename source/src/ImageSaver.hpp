@@ -11,7 +11,7 @@
 
 class ImageSaver {
     public:
-        static void run(const cv::Mat &image, const cv::Rect &aboveHorizon, const std::vector<cv::Point> &vehicleContour);
+        static void run(cv::Mat const& image, cv::Rect const& aboveHorizon, const std::vector<cv::Point> &vehicleContour);
     private:
         static const std::string dir;
         static const std::string org;
@@ -21,7 +21,13 @@ class ImageSaver {
         static const std::string yellow;
         static const std::string filtered;
         static const std::string edges;
+        static const std::string matches;
+        static const std::string base;
+        static const std::string merged;
+        static const std::string processed;
         static const std::string type;
+
+        static void drawRects(const std::vector<cv::Rect> &rects, cv::Mat &img, const cv::Scalar &color);
 };
 
 #endif
