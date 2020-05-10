@@ -138,7 +138,7 @@ int32_t main(int32_t argc, char **argv) {
                         rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
                     }                     
                     
-                    color = cv::Scalar(255,255,0);
+                    color = cv::Scalar(0,255,255);
                     for( size_t i = 0; i < rectYellow.size(); i++ ) {
                         rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
                     } 
