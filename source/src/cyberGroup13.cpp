@@ -29,8 +29,7 @@
 #include "ImageFilter.hpp"
 #include "ImageTracker.hpp"
 #include "CsvManager.hpp"
-
-
+#include "ImageSaver.hpp"
 
 using namespace cv;
 using namespace std;
@@ -112,6 +111,8 @@ int32_t main(int32_t argc, char **argv) {
                 uint32_t ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
                 sharedMemory->unlock();
                 
+                // ImageSaver::run(img, aboveHorizon, vehicleContour);
+                
                 imageCropper.setImage(img);
                 imageCropper.cropRectangle(aboveHorizon);
                 imageCropper.cropPolygon(vehicleContour);
@@ -121,7 +122,7 @@ int32_t main(int32_t argc, char **argv) {
 
                 cv::Point blueCone, yellowCone, orangeCone;
 
-                //Here we log the data to the csv file
+                // Here we log the data to the csv file
                 CsvManager::add(ts, gsr.groundSteering(), 0.5);
 
                 // Display images on your screen.
