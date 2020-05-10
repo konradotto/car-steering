@@ -42,7 +42,7 @@ RUN mkdir build && \
     make && make install && \
     #CTEST_OUTPUT_ON_FAILURE=TRUE make test && make coverage && \
     #mkdir /tmp/coverage && cp cobertura.xml coverage.txt coverage-reports/*.html /tmp/coverage && \
-    cp ../assets/templateCone1.png /tmp && mkdir ../../csv 
+    cp ../assets/templateCone1.png /tmp && mkdir ../../csv && mkdir ../../img
     
 
 # Second stage for packaging the software into a software bundle:
