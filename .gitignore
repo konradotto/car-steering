@@ -2,5 +2,6 @@ build
 *.so
 export/
 csv/
-.vscode
-run.sh
+*.vscode
+*.sh
+img/
