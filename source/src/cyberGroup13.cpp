@@ -25,6 +25,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <math.h>
+#include <cmath>
 #define PI 3.14159265
 
 #include "ImageCropper.hpp"
@@ -43,6 +44,8 @@ const String TEMPLATE_PATH = "templateCone1.png";
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
 Point calcPoint(Rect rect);
 double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones);
+bool intersection(Point a1, Point a2, Point b1, Point b2);
+double cross(Point v1,Point v2);
 
 
 int32_t main(int32_t argc, char **argv) {
@@ -163,24 +166,23 @@ int32_t main(int32_t argc, char **argv) {
                             Point(blines[0][2], blines[0][3]), Scalar(0,0,255), 3, 8 );
                             break;
                     }
-                    line( img, Point(320, 290),
-                            Point(320, 362), Scalar(0,255,255), 3, 8 );
+                    
 
 
-                    if (blines.size() > 1 && ylines.size() > 1){
-                        std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
-                        std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
-                        //cout << "left points >>>\n" << leftPoints << endl;
-                        //cout << "right points >>>\n" << rightPoints << endl;
-
-                        double gsr1 = getSteeringAngle(leftPoints,rightPoints);
-                        //Here we log the data to the csv file
-                        CsvManager::add(ts, gsr.groundSteering(), gsr1,"1");
-
-                    }
-                    else{
-                        CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
-                    }
+                    //if (blines.size() > 1 && ylines.size() > 1){
+                    //    std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
+                    //    std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
+                    //    //cout << "left points >>>\n" << leftPoints << endl;
+                    //    //cout << "right points >>>\n" << rightPoints << endl;
+//
+                    //    double gsr1 = getSteeringAngle(leftPoints,rightPoints);
+                    //    //Here we log the data to the csv file
+                    //    CsvManager::add(ts, gsr.groundSteering(), gsr1,"1");
+//
+                    //}
+                    //else{
+                    //    //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
+                    //}
 
                     //if (blines.size()>0 && ylines.size()>0){
                     //    std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
@@ -189,53 +191,75 @@ int32_t main(int32_t argc, char **argv) {
                     //    CsvManager::add(ts, gsr.groundSteering(), gr1);
                     //}
                     
-
-                    //int x = (blines.size()>0 && ylines.size()>0)?1:(blines.size()>0)?2:(ylines.size()>0)?3:0;
-                    //int x_offset , y_offset, b_x2, y_x2,x1,x2,y1,y2;
-                    //int mid = 320;
-                    //y_offset = 70;
-                    //switch (x)
-                    //{
-                    //case 1:
-                    //    cout << "case 1" << endl;
-                    //    cout << "yellow line at: " << ylines[0] << endl;
-                    //    cout << "bluline at: " << blines[0] << endl;
-                    //    b_x2 = blines[0][2];
-                    //    y_x2 = ylines[0][2];
-                    //    x_offset = (b_x2 + y_x2) / 2 - mid;
-                    //    break;
-                    //case 2:
-                    //    cout << "case 2" << endl;
-                    //    cout << "bluline at: " << blines[0] << endl;
-                    //    x1 = blines[0][0];
-                    //    x2 = blines[0][2];
-                    //    y1 = blines[0][1];
-                    //    y2 = blines[0][3];
-                    //    x_offset = x2 - x1;
-                    //    //y_offset = y2 - y1;
-                    //    break;
-                    //case 3:
-                    //    cout << "case 3" << endl;
-                    //    cout << "yellow line at: " << ylines[0] << endl;
-                    //    x1 = ylines[0][0];
-                    //    x2 = ylines[0][2];
-                    //    y1 = ylines[0][1];
-                    //    y2 = ylines[0][3];
-                    //    x_offset = x2 - x1;
-                    //   // y_offset = y2 - y1;
-                    //    break;
-                    //default:
-                    //    break;
-                    //}
-                    //if(x){
-                    //double angle_to_mid_radian = atan(x_offset / y_offset);  //# angle (in radian) to center vertical line
-                    //double angle_to_mid_deg = angle_to_mid_radian * 180.0 / PI;  //# angle (in degrees) to center vertical line
-                    //CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_radian * 0.1, to_string(x));
-                    //}
-                    //else {
-                    //    CsvManager::add(ts, gsr.groundSteering(), 0.0, "0");
-                    //}
                     
+
+                    line( img, Point(320, 290),
+                            Point(320, 362), Scalar(0,255,255), 3, 8 );
+                    
+                    int x = (blines.size()>0 && ylines.size()>0)?1:(blines.size()>0)?2:(ylines.size()>0)?3:0;
+                    int  b_x2, y_x2,x1,x2,y1,y2;
+                    double x_offset , y_offset;
+                    int mid = 320;
+                    y_offset = 70;
+                    switch (x)
+                    {
+                    case 1:
+                        cout << "case 1" << endl;
+                        cout << "yellow line at: " << ylines[0] << endl;
+                        cout << "bluline at: " << blines[0] << endl;
+                        b_x2 = blines[0][2];
+                        y_x2 = ylines[0][2];
+                        x_offset = (b_x2 + y_x2) / 2 - mid;
+                        break;
+                    case 2:
+                        cout << "case 2" << endl;
+                        cout << "bluline at: " << blines[0] << endl;
+                        if(intersection(Point(320, 290),Point(320, 362),Point(blines[0][0],blines[0][2]),Point(blines[0][1],blines[0][3]))){
+                            cout << "intersection with blue" << endl;
+                            x1 = blines[0][0];
+                            x2 = blines[0][2];
+                            y1 = blines[0][1];
+                            y2 = blines[0][3];
+                            y_offset = abs(290-y1>0?290-y1:1);
+                            x_offset = y_offset != 1 ? x2 - x1 : 0;
+                            cout << "norm length: " << y_offset << endl;
+                        }
+                        else{
+                                x_offset = 0.0;
+                        }
+                        
+                        break;
+                    case 3:
+                        cout << "case 3" << endl;
+                        cout << "yellow line at: " << ylines[0] << endl;
+                        if(intersection(Point(320, 290),Point(320, 362),Point(ylines[0][0],ylines[0][2]),Point(ylines[0][1],ylines[0][3]))){
+                            cout << "intersection with yellow" << endl;
+                            x1 = ylines[0][0];
+                            x2 = ylines[0][2];
+                            y1 = ylines[0][1];
+                            y2 = ylines[0][3];
+                            
+                            y_offset = abs(290-y1>0?290-y1:1);
+                            x_offset = y_offset != 1 ? x2 - x1 : 0;
+                            cout << "norm length: " << y_offset << endl;
+                        }
+                        else{
+                            x_offset = 0.0;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                    if(x){
+                        //EPS: 1e-8
+                    double angle_to_mid_radian = x_offset !=0 ? atan2(y_offset,x_offset) : 0;  //# angle (in radian) to center vertical line
+                    double angle_to_mid_deg =  angle_to_mid_radian * 180.0 / PI;  //# angle (in degrees) to center vertical line
+                    CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_radian * 0.1, to_string(x));
+                    }
+                    else {
+                        //CsvManager::add(ts, gsr.groundSteering(), 0.0, "0");
+                    }
+            
 
                     /*
                     for( size_t i = 0; i < rectBlue.size(); i++ ) {
@@ -299,4 +323,24 @@ double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
 
 Point calcPoint(Rect rect){
     return (rect.br() + rect.tl()) * 0.5;
+}
+
+
+bool intersection(Point a1, Point a2, Point b1, Point b2)
+{
+    Point p = a1;
+    Point q = b1;
+    Point r(a2-a1);
+    Point s(b2-b1);
+
+    if(cross(r,s) == 0) {return false;}
+
+    double t = cross(q-p,s)/cross(r,s);
+
+    //intPnt = p + t*r;
+    return true;
+}
+
+double cross(Point v1,Point v2){
+    return v1.x*v2.y - v1.y*v2.x;
 }
