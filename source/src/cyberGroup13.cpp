@@ -24,6 +24,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
+#include <math.h>
+#define PI 3.14159265
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
@@ -38,10 +40,13 @@ RNG rng(12345);
 const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
+Point calcPoint(Rect rect);
+double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones);
 
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
+    uint32_t ts = 0;
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ( (0 == commandlineArguments.count("cid")) ||
@@ -88,6 +93,7 @@ int32_t main(int32_t argc, char **argv) {
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+                //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
             };
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
 
@@ -102,14 +108,16 @@ int32_t main(int32_t argc, char **argv) {
 
                 // Lock the shared memory.
                 sharedMemory->lock();
+                
                 {
                     // Copy the pixels from the shared memory into our own data structure.
                     cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
                     img = wrapped.clone();
-                }
+                } 
+                ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
-                uint32_t ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
                 sharedMemory->unlock();
+                
                 
                 // ImageSaver::run(img, aboveHorizon, vehicleContour);
                 
@@ -122,18 +130,118 @@ int32_t main(int32_t argc, char **argv) {
 
                 cv::Point blueCone, yellowCone, orangeCone;
 
-                // Here we log the data to the csv file
-                CsvManager::add(ts, gsr.groundSteering(), 0.5);
+
 
                 // Display images on your screen.
                 if (VERBOSE) {
 
                     Scalar color = cv::Scalar(255,0,0);
                     vector<Rect> rectBlue, rectYellow;
-
                     coneTracker.setMinRectArea(75);
                     coneTracker.run(blueEdges, rectBlue);
                     coneTracker.run(yellowEdges, rectYellow);
+                    
+                    std::vector<cv::Point> yPoints,bPoints;
+                    for (size_t k = 0; k<rectYellow.size(); k++){
+                        yPoints.push_back(calcPoint(rectYellow[k]));
+                    }
+                    for (size_t j=0;j<rectBlue.size();j++){
+                        bPoints.push_back(calcPoint(rectBlue[j]));
+                    }
+                    blueEdges = Scalar(0,0,0);
+                    polylines(blueEdges,bPoints,false,Scalar(255,255,255),2,150,0);
+                    yellowEdges = Scalar(0,0,0);
+                    polylines(yellowEdges,yPoints,false,Scalar(255,255,255),2,150,0);
+                    
+                    vector<Vec4i> ylines;
+                    HoughLinesP(yellowEdges, ylines, 1, CV_PI/180, 10, 10, 50);
+                    for( size_t i = 0; i < ylines.size(); i++ )
+                    {
+                        line( img, Point(ylines[0][0], ylines[0][1]),
+                            Point(ylines[0][2], ylines[0][3]), Scalar(0,0,255), 3, 8 );
+                            break;
+                    }
+                    vector<Vec4i> blines;
+                    HoughLinesP(blueEdges, blines, 1, CV_PI/180, 10, 10, 50);
+                    for( size_t i = 0; i < blines.size(); i++ )
+                    {
+                        line( img, Point(blines[0][0], blines[0][1]),
+                            Point(blines[0][2], blines[0][3]), Scalar(0,0,255), 3, 8 );
+                            break;
+                    }
+                    line( img, Point(320, 290),
+                            Point(320, 362), Scalar(0,255,255), 3, 8 );
+
+
+                    if (blines.size() > 1 && ylines.size() > 1){
+                        std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
+                        std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
+                        //cout << "left points >>>\n" << leftPoints << endl;
+                        //cout << "right points >>>\n" << rightPoints << endl;
+
+                        double gsr1 = getSteeringAngle(leftPoints,rightPoints);
+                        //Here we log the data to the csv file
+                        CsvManager::add(ts, gsr.groundSteering(), gsr1,"1");
+                    }
+                    else{
+                        CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
+                    }
+
+                    //if (blines.size()>0 && ylines.size()>0){
+                    //    std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
+                    //    std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
+                    //    double gr1 = getSteeringAngle(leftPoints,rightPoints);
+                    //    CsvManager::add(ts, gsr.groundSteering(), gr1);
+                    //}
+                    
+
+                    //int x = (blines.size()>0 && ylines.size()>0)?1:(blines.size()>0)?2:(ylines.size()>0)?3:0;
+                    //int x_offset , y_offset, b_x2, y_x2,x1,x2,y1,y2;
+                    //int mid = 320;
+                    //y_offset = 70;
+                    //switch (x)
+                    //{
+                    //case 1:
+                    //    cout << "case 1" << endl;
+                    //    cout << "yellow line at: " << ylines[0] << endl;
+                    //    cout << "bluline at: " << blines[0] << endl;
+                    //    b_x2 = blines[0][2];
+                    //    y_x2 = ylines[0][2];
+                    //    x_offset = (b_x2 + y_x2) / 2 - mid;
+                    //    break;
+                    //case 2:
+                    //    cout << "case 2" << endl;
+                    //    cout << "bluline at: " << blines[0] << endl;
+                    //    x1 = blines[0][0];
+                    //    x2 = blines[0][2];
+                    //    y1 = blines[0][1];
+                    //    y2 = blines[0][3];
+                    //    x_offset = x2 - x1;
+                    //    //y_offset = y2 - y1;
+                    //    break;
+                    //case 3:
+                    //    cout << "case 3" << endl;
+                    //    cout << "yellow line at: " << ylines[0] << endl;
+                    //    x1 = ylines[0][0];
+                    //    x2 = ylines[0][2];
+                    //    y1 = ylines[0][1];
+                    //    y2 = ylines[0][3];
+                    //    x_offset = x2 - x1;
+                    //   // y_offset = y2 - y1;
+                    //    break;
+                    //default:
+                    //    break;
+                    //}
+                    //if(x){
+                    //double angle_to_mid_radian = atan(x_offset / y_offset);  //# angle (in radian) to center vertical line
+                    //double angle_to_mid_deg = angle_to_mid_radian * 180.0 / PI;  //# angle (in degrees) to center vertical line
+                    //CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_radian * 0.1, to_string(x));
+                    //}
+                    //else {
+                    //    CsvManager::add(ts, gsr.groundSteering(), 0.0, "0");
+                    //}
+                    
+
                     
                     for( size_t i = 0; i < rectBlue.size(); i++ ) {
                         rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
@@ -143,6 +251,8 @@ int32_t main(int32_t argc, char **argv) {
                     for( size_t i = 0; i < rectYellow.size(); i++ ) {
                         rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
                     } 
+                    
+
                     cv::imshow("/tmp/img/full", img);
                     cv::waitKey(1);
                 }
@@ -172,4 +282,26 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(581, 412));
     vehicleContour.push_back(cv::Point(width, 427));
     vehicleContour.push_back(cv::Point(width, height));
+}
+
+double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
+{
+    double leftSlope=(double)(leftCones[1].y-leftCones[0].y)/(double)(leftCones[1].x-leftCones[0].x);
+    //The line format: Y=leftSlope*(X-X0)+X0
+    double rightSlope=(double)(rightCones[1].y-rightCones[0].y)/(double)(rightCones[1].x-rightCones[0].x);
+    //The line format: Y=rightSlope*(X-X0)+X0
+    int middleOfTheCar=320;//I don't know the proper number yet
+    int horizion=70;//I don't know the proper number yet
+    double leftLaneIntersection=leftSlope*(middleOfTheCar-leftCones[0].x)+leftCones[0].x;
+    double rightLaneIntersection=rightSlope*(middleOfTheCar-rightCones[0].x)+rightCones[0].x;
+    if(leftLaneIntersection>horizion||rightLaneIntersection>horizion)
+        if(leftLaneIntersection>rightLaneIntersection)
+            return -leftLaneIntersection*0.0005;
+        else
+            return rightLaneIntersection*0.0005;
+    return 0;
+}
+
+Point calcPoint(Rect rect){
+    return (rect.br() + rect.tl()) * 0.5;
 }

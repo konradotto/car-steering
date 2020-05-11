@@ -27,7 +27,7 @@ def populate_data(lines):
         ground_steering_requests.append(gr0)
         calc_ground_steering_requests.append(gr1)
     n = len(time_stamps)
-    calc_ground_steering_requests = [0.00 for x in calc_ground_steering_requests]
+    calc_ground_steering_requests = [0] * n
 
 
 def get_lines():
@@ -73,8 +73,6 @@ def calculate_performance(max_rel_error_allowed):
                 relative_error[i] = 1
         else:
             relative_error[i] = error/abs(request)
-        if relative_error[i] < max_rel_error_allowed:
-            print("request: ", request, " calc: ", calculated_request, " error: ", error, " rel error: ", relative_error[i])
 
     nr_good_enough = sum([rel_error < max_rel_error_allowed for rel_error in relative_error])
     print(nr_good_enough)
@@ -89,6 +87,7 @@ if __name__ == '__main__':
     #print("tss:\n",time_stamps)
     #print("gr0s:\n",ground_steering_requests)
     #print("gr1s;\n",calc_ground_steering_requests)
+    plot()
     calculate_performance(0.5)
     hist()
     sys.exit()
