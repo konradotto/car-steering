@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const char* CsvManager::path = "csv/reports.csv";
+const char* CsvManager::path = "/csv/reports.csv";
 const char CsvManager::delimiter = ';';
 
 void CsvManager::refresh(){

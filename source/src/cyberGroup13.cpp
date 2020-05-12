@@ -32,8 +32,7 @@
 #include "ImageFilter.hpp"
 #include "ImageTracker.hpp"
 #include "CsvManager.hpp"
-
-
+#include "ImageSaver.hpp"
 
 using namespace cv;
 using namespace std;
@@ -56,6 +55,7 @@ Point ix = {0,0};
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
+    uint32_t ts = 0;
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ( (0 == commandlineArguments.count("cid")) ||
@@ -102,6 +102,7 @@ int32_t main(int32_t argc, char **argv) {
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+                //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
             };
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
 
@@ -116,14 +117,18 @@ int32_t main(int32_t argc, char **argv) {
 
                 // Lock the shared memory.
                 sharedMemory->lock();
+                
                 {
                     // Copy the pixels from the shared memory into our own data structure.
                     cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
                     img = wrapped.clone();
-                }
+                } 
+                ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
-                uint32_t ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
                 sharedMemory->unlock();
+                
+                
+                // ImageSaver::run(img, aboveHorizon, vehicleContour);
                 
                 imageCropper.setImage(img);
                 imageCropper.cropRectangle(aboveHorizon);
@@ -161,7 +166,6 @@ int32_t main(int32_t argc, char **argv) {
                         double gsr1 = getSteeringAngle(leftPoints,rightPoints);
                         //Here we log the data to the csv file
                         CsvManager::add(ts, gsr.groundSteering(), gsr1,"1");
-
                     }
                     else{
                         //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
@@ -198,7 +202,7 @@ int32_t main(int32_t argc, char **argv) {
                         rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
                     }                     
                     
-                    color = cv::Scalar(255,255,0);
+                    color = cv::Scalar(0,255,255);
                     for( size_t i = 0; i < rectYellow.size(); i++ ) {
                         rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
                     } 
@@ -355,7 +359,6 @@ double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines){
         break;
     }
     if(x){
-        //EPS: 1e-8
     double theta = atan2(yOffset,xOffset);  //# angle (in radian) to center vertical line
     return theta;
     }
