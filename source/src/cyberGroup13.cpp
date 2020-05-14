@@ -258,7 +258,7 @@ bool intersection(Vec4i line, Point &x)
 
     x = heading0 + t*r;
     ix = x;
-    return (x.y >= heading0.y || x.y <= heading1.y);
+    return (x.y >= heading0.y && x.y <= heading1.y);
     //return (norm(Mat(x),Mat(heading1)) <= intersectionDistance);
 }
 
