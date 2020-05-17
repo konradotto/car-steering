@@ -27,7 +27,7 @@ def populate_data(lines):
         ground_steering_requests.append(gr0)
         calc_ground_steering_requests.append(gr1)
     n = len(time_stamps)
-    calc_ground_steering_requests = [0] * n
+    # calc_ground_steering_requests = [0] * n
 
 
 def get_lines():
@@ -48,8 +48,9 @@ def get_lines():
 def plot():
     fig1 = plt.plot(time_stamps, ground_steering_requests, label='Ground Steering Request')
     fig2 = plt.plot(time_stamps, calc_ground_steering_requests, label='Calculated Ground Steering')
-    fig3 = plt.plot(time_stamps, [max(ground_steering_requests)]*len(time_stamps), label='max ground steering')
-    fig4 = plt.plot(time_stamps, [min(ground_steering_requests)]*len(time_stamps), label='min ground steering')
+    fig3 = plt.text(time_stamps[0], ground_steering_requests[0], "Group 13", fontsize=72)
+    # fig3 = plt.plot(time_stamps, [max(ground_steering_requests)]*len(time_stamps), label='max ground steering')
+    # fig4 = plt.plot(time_stamps, [min(ground_steering_requests)]*len(time_stamps), label='min ground steering')
 
     plt.legend()
     plt.show()
