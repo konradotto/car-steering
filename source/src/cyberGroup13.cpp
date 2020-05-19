@@ -24,8 +24,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
-#include <math.h>
-#define PI 3.14159265
+#include <cmath>
 
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
@@ -42,7 +41,19 @@ const String TEMPLATE_PATH = "templateCone1.png";
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
 Point calcPoint(Rect rect);
 double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones);
+bool intersection(Vec4i line, Point &x);
+double cross(Point v1,Point v2);
+double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines);
+void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point> &bPoints,const vector<Point> &yPoints, Mat mat);
+void calcOffset(const Vec4i &line,const Point intersection, int &xOffset, int &yOffset);
+double stabilizedGSR(double nGsr);
 
+
+const Point heading0 = {320,270};
+const Point heading1 = {320,360};
+Point ix = {0,0};
+double currentAngle;
+//const double intersectionDistance = 70;
 
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
@@ -129,120 +140,45 @@ int32_t main(int32_t argc, char **argv) {
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
 
                 cv::Point blueCone, yellowCone, orangeCone;
+                vector<Rect> rectBlue, rectYellow;
+                coneTracker.setMinRectArea(75);
+                coneTracker.run(blueEdges, rectBlue);
+                coneTracker.run(yellowEdges, rectYellow);
+                
 
-
-
+                vector<Point> yPoints,bPoints;
+                for (size_t k = 0; k<rectYellow.size(); k++){
+                    yPoints.push_back(calcPoint(rectYellow[k]));
+                }
+                for (size_t j=0;j<rectBlue.size();j++){
+                    bPoints.push_back(calcPoint(rectBlue[j]));
+                }
+                vector<Vec4i> bLines,yLines;
+                houghLines(bLines,yLines,bPoints,yPoints,blueEdges);
+                double gsr1 = calcGSR(bLines,yLines);
+                CsvManager::add(ts, gsr.groundSteering(), gsr1);
+                currentAngle = gsr1;
                 // Display images on your screen.
                 if (VERBOSE) {
 
-                    Scalar color = cv::Scalar(255,0,0);
-                    vector<Rect> rectBlue, rectYellow;
-                    coneTracker.setMinRectArea(75);
-                    coneTracker.run(blueEdges, rectBlue);
-                    coneTracker.run(yellowEdges, rectYellow);
-                    
-                    std::vector<cv::Point> yPoints,bPoints;
-                    for (size_t k = 0; k<rectYellow.size(); k++){
-                        yPoints.push_back(calcPoint(rectYellow[k]));
-                    }
-                    for (size_t j=0;j<rectBlue.size();j++){
-                        bPoints.push_back(calcPoint(rectBlue[j]));
-                    }
-                    blueEdges = Scalar(0,0,0);
-                    polylines(blueEdges,bPoints,false,Scalar(255,255,255),2,150,0);
-                    yellowEdges = Scalar(0,0,0);
-                    polylines(yellowEdges,yPoints,false,Scalar(255,255,255),2,150,0);
-                    
-                    vector<Vec4i> ylines;
-                    HoughLinesP(yellowEdges, ylines, 1, CV_PI/180, 10, 10, 50);
-                    for( size_t i = 0; i < ylines.size(); i++ )
-                    {
-                        line( img, Point(ylines[0][0], ylines[0][1]),
-                            Point(ylines[0][2], ylines[0][3]), Scalar(0,0,255), 3, 8 );
+                    for(size_t i = 0; i < yLines.size(); i++){
+                        line( img, Point(yLines[i][0], yLines[i][1]),
+                            Point(yLines[i][2], yLines[i][3]), Scalar(0,0,255), 3, 8 );
                             break;
                     }
-                    vector<Vec4i> blines;
-                    HoughLinesP(blueEdges, blines, 1, CV_PI/180, 10, 10, 50);
-                    for( size_t i = 0; i < blines.size(); i++ )
-                    {
-                        line( img, Point(blines[0][0], blines[0][1]),
-                            Point(blines[0][2], blines[0][3]), Scalar(0,0,255), 3, 8 );
+                    for(size_t i = 0; i < bLines.size(); i++){
+                        line(img, Point(bLines[i][0], bLines[i][1]),
+                            Point(bLines[i][2], bLines[i][3]), 
+                            Scalar(0,0,255), 3, 8);
                             break;
                     }
-                    line( img, Point(320, 290),
-                            Point(320, 362), Scalar(0,255,255), 3, 8 );
-
-
-                    if (blines.size() > 1 && ylines.size() > 1){
-                        std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
-                        std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
-                        //cout << "left points >>>\n" << leftPoints << endl;
-                        //cout << "right points >>>\n" << rightPoints << endl;
-
-                        double gsr1 = getSteeringAngle(leftPoints,rightPoints);
-                        //Here we log the data to the csv file
-                        CsvManager::add(ts, gsr.groundSteering(), gsr1,"1");
+                    
+                    line(img, heading0, heading1, Scalar(0,255,255), 3, 8);
+                    if (ix.x != 0 && ix.y != 0){
+                        circle(img, ix, 3, {255,0,0}, CV_FILLED);
                     }
-                    else{
-                        CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
-                    }
-
-                    //if (blines.size()>0 && ylines.size()>0){
-                    //    std::vector<cv::Point> rightPoints = {Point(blines[0][0],blines[0][1]),Point(blines[0][2],blines[0][3])};
-                    //    std::vector<cv::Point> leftPoints = {Point(ylines[0][0],ylines[0][1]),Point(ylines[0][2],ylines[0][3])};
-                    //    double gr1 = getSteeringAngle(leftPoints,rightPoints);
-                    //    CsvManager::add(ts, gsr.groundSteering(), gr1);
-                    //}
                     
-
-                    //int x = (blines.size()>0 && ylines.size()>0)?1:(blines.size()>0)?2:(ylines.size()>0)?3:0;
-                    //int x_offset , y_offset, b_x2, y_x2,x1,x2,y1,y2;
-                    //int mid = 320;
-                    //y_offset = 70;
-                    //switch (x)
-                    //{
-                    //case 1:
-                    //    cout << "case 1" << endl;
-                    //    cout << "yellow line at: " << ylines[0] << endl;
-                    //    cout << "bluline at: " << blines[0] << endl;
-                    //    b_x2 = blines[0][2];
-                    //    y_x2 = ylines[0][2];
-                    //    x_offset = (b_x2 + y_x2) / 2 - mid;
-                    //    break;
-                    //case 2:
-                    //    cout << "case 2" << endl;
-                    //    cout << "bluline at: " << blines[0] << endl;
-                    //    x1 = blines[0][0];
-                    //    x2 = blines[0][2];
-                    //    y1 = blines[0][1];
-                    //    y2 = blines[0][3];
-                    //    x_offset = x2 - x1;
-                    //    //y_offset = y2 - y1;
-                    //    break;
-                    //case 3:
-                    //    cout << "case 3" << endl;
-                    //    cout << "yellow line at: " << ylines[0] << endl;
-                    //    x1 = ylines[0][0];
-                    //    x2 = ylines[0][2];
-                    //    y1 = ylines[0][1];
-                    //    y2 = ylines[0][3];
-                    //    x_offset = x2 - x1;
-                    //   // y_offset = y2 - y1;
-                    //    break;
-                    //default:
-                    //    break;
-                    //}
-                    //if(x){
-                    //double angle_to_mid_radian = atan(x_offset / y_offset);  //# angle (in radian) to center vertical line
-                    //double angle_to_mid_deg = angle_to_mid_radian * 180.0 / PI;  //# angle (in degrees) to center vertical line
-                    //CsvManager::add(ts, gsr.groundSteering(), angle_to_mid_radian * 0.1, to_string(x));
-                    //}
-                    //else {
-                    //    CsvManager::add(ts, gsr.groundSteering(), 0.0, "0");
-                    //}
-                    
-
-                    
+                    /*
                     for( size_t i = 0; i < rectBlue.size(); i++ ) {
                         rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
                     }                     
@@ -251,7 +187,7 @@ int32_t main(int32_t argc, char **argv) {
                     for( size_t i = 0; i < rectYellow.size(); i++ ) {
                         rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
                     } 
-                    
+                    */
 
                     cv::imshow("/tmp/img/full", img);
                     cv::waitKey(1);
@@ -283,7 +219,7 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(width, 427));
     vehicleContour.push_back(cv::Point(width, height));
 }
-
+/*
 double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
 {
     double leftSlope=(double)(leftCones[1].y-leftCones[0].y)/(double)(leftCones[1].x-leftCones[0].x);
@@ -301,7 +237,85 @@ double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
             return rightLaneIntersection*0.0005;
     return 0;
 }
+*/
 
 Point calcPoint(Rect rect){
-    return (rect.br() + rect.tl()) * 0.5;
+    Point n = (rect.br() + rect.tl()) * 0.5;
+    return {n.x, rect.br().y};
+}
+
+
+bool intersection(Vec4i line, Point &x)
+{
+    Point lineP0 = {line[0],line[1]};
+    Point lineP1 = {line[2],line[3]};
+    Point r(heading1-heading0);
+    Point s(lineP1-lineP0);
+
+    if(cross(r,s) == 0) {return false;}
+
+    double t = cross(lineP0-heading0,s)/cross(r,s);
+
+    x = heading0 + t*r;
+    ix = x;
+    return (x.y >= heading0.y && x.y <= heading1.y);
+    //return (norm(Mat(x),Mat(heading1)) <= intersectionDistance);
+}
+
+double cross(Point v1,Point v2){
+    return v1.x*v2.y - v1.y*v2.x;
+}
+
+void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point> &bPoints,const vector<Point> &yPoints, Mat mat){
+    mat = Scalar(0,0,0);
+    polylines(mat,bPoints,false,Scalar(255,255,255),2,150,0);
+    HoughLinesP(mat, bLines, 1, CV_PI/180, 10, 10, 10);
+    mat = Scalar(0,0,0);
+    polylines(mat,yPoints,false,Scalar(255,255,255),2,150,0);
+    HoughLinesP(mat, yLines, 1, CV_PI/180, 10, 10, 10);
+}
+
+double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines){
+    
+    int x = (bLines.size()>0 && yLines.size()>0)?1:(bLines.size()>0)?2:(yLines.size()>0)?3:0;
+    int xOffset = 0 , yOffset = 1;
+    Point intersectionPoint,intersectionPoint2;
+    switch (x)
+    {
+    case 1:
+        if (intersection(bLines[0],intersectionPoint) && intersection(yLines[0],intersectionPoint2)){
+            double distBlue = norm(Mat(heading1),Mat(intersectionPoint));
+            double distYellow = norm(Mat(heading1),Mat(intersectionPoint2));
+            calcOffset(distBlue<distYellow?bLines[0]:yLines[0],distBlue<distYellow?intersectionPoint:intersectionPoint2,xOffset,yOffset);
+            break;
+        }
+        else if(intersection(bLines[0],intersectionPoint)){
+            calcOffset(bLines[0],intersectionPoint,xOffset,yOffset);
+        }
+        else if (intersection(yLines[0],intersectionPoint)){
+            calcOffset(yLines[0],intersectionPoint,xOffset,yOffset);
+        }
+        break;
+    case 2:
+        if(intersection(bLines[0],intersectionPoint)){
+            calcOffset(bLines[0],intersectionPoint,xOffset,yOffset);
+        }
+        break;
+    case 3:
+        if(intersection(yLines[0],intersectionPoint)){
+            calcOffset(yLines[0],intersectionPoint,xOffset,yOffset);
+        }
+        break;
+    default:
+        break;
+    }
+    double theta = atan2(yOffset,xOffset);  //# angle (in radian) to center vertical line
+    return ((theta>1||theta<-1)?0:(theta<-0.3?-0.3:theta>0.3?0.3:theta));
+    
+
+}
+
+void calcOffset(const Vec4i &line,const Point intersection, int &xOffset, int &yOffset){
+    xOffset = line[2] - intersection.x;
+    yOffset = line[3] - intersection.y;
 }

@@ -15,7 +15,7 @@ const vector<pair<Scalar, Scalar>> ImageFilter::orangeRanges = {ImageFilter::ora
 
 Mat ImageFilter::filterColorRange(const Mat &img, vector<pair<Scalar, Scalar>> colorRanges) {
 	// convert img to hsv-color-spectrum
-	Mat hsv, filteredImage,filteredEdges;
+	Mat hsv, filteredImage,filteredEdges,res;
 	cvtColor(img, hsv, COLOR_BGR2HSV);
 
 	// iterate over color ranges
@@ -24,12 +24,14 @@ Mat ImageFilter::filterColorRange(const Mat &img, vector<pair<Scalar, Scalar>> c
 	for (auto const& colorRange: colorRanges) {
 		if (firstIteration) {
 			filteredImage = applyColorFilter(hsv, colorRange);
+			res = filteredImage;
 			firstIteration = false;
 		} else {
-			filteredImage += applyColorFilter(hsv, colorRange);
+			bitwise_or(filteredImage,applyColorFilter(hsv, colorRange),res);
+			filteredImage = res;
 		}
 	}
-	return filteredImage;
+	return res;
 }
 
 
