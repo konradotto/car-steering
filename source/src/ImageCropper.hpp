@@ -60,5 +60,12 @@ class ImageCropper {
         cv::Scalar cropColor = cv::Scalar(0,0,0);       // Black color
 };
 
+/**
+ * Utility function to return an array of points (and its length) when given a vector of points
+ * 
+ * @param[in] vector Reference to the vector that needs to be converted
+ * @param[out] nrOfArrayPoints the length of the returned vector
+ * @return array of points corresponding to the provided vector
+ */
 const cv::Point * transformVectorToArray(const std::vector<cv::Point> &vector, int &nrOfArrayPoints);
 #endif
