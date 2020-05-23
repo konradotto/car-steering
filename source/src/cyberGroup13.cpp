@@ -36,7 +36,6 @@ using namespace cv;
 using namespace std;
 
 RNG rng(12345);
-const String TEMPLATE_PATH = "templateCone1.png";
 
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
 Point calcPoint(Rect rect);
@@ -93,7 +92,7 @@ int32_t main(int32_t argc, char **argv) {
             std::vector<cv::Point> vehicleContour;
             initVehicleContour(vehicleContour, WIDTH, HEIGHT);
 
-            ImageTracker coneTracker = ImageTracker(TEMPLATE_PATH, 0);
+            ImageTracker coneTracker = ImageTracker(0);
 
             CsvManager::refresh();  //clean the directory & create a csv file
 
@@ -133,8 +132,8 @@ int32_t main(int32_t argc, char **argv) {
                 // ImageSaver::run(img, aboveHorizon, vehicleContour);
                 
                 imageCropper.setImage(img);
-                imageCropper.cropRectangle(aboveHorizon);
-                imageCropper.cropPolygon(vehicleContour);
+                imageCropper.cropRectangle(aboveHorizon);//Crop the upper rectangle
+                imageCropper.cropPolygon(vehicleContour);//Crop the vehicle
 
                 Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
                 Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
@@ -199,6 +198,7 @@ int32_t main(int32_t argc, char **argv) {
     return retCode;
 }
 
+//Vehicle point outline
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height) {
     vehicleContour.push_back(cv::Point(0, height));
     vehicleContour.push_back(cv::Point(0, 423));
@@ -252,7 +252,7 @@ bool intersection(Vec4i line, Point &x)
     Point r(heading1-heading0);
     Point s(lineP1-lineP0);
 
-    if(cross(r,s) == 0) {return false;}
+    if(abs(cross(r,s) - 0.0) <= 0.0000001) {return false;}
 
     double t = cross(lineP0-heading0,s)/cross(r,s);
 
