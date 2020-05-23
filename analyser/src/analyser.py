@@ -98,6 +98,6 @@ if __name__ == '__main__':
     #print("gr0s:\n",ground_steering_requests)
     #print("gr1s;\n",calc_ground_steering_requests)
     plot()
-    #calculate_performance(0.5)
+    calculate_performance(0.5)
     # hist(40)
     sys.exit()
