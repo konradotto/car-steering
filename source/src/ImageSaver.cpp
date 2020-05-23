@@ -1,7 +1,5 @@
 #include "ImageSaver.hpp"
 
-const String TEMPLATE_PATH = "templateCone1.png";
-
 using namespace std;
 using namespace cv;
 
@@ -25,7 +23,7 @@ void ImageSaver::run(Mat const& image, Rect const& aboveHorizon, const vector<Po
     imwrite(dir+org+type, img);
 
     ImageCropper imageCropper = ImageCropper();
-    ImageTracker coneTracker = ImageTracker(TEMPLATE_PATH, 0);
+    ImageTracker coneTracker = ImageTracker(0);
      
     // mark cropping areas and save           
     imageCropper.setImage(img);
