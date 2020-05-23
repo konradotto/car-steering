@@ -22,7 +22,7 @@ void ImageCropper::cropRectangle(const cv::Rect &cropRect) {
 void ImageCropper::markPolygon(const std::vector<cv::Point> &markContour) {
     // convert vector
     int npts;
-    const cv::Point *pts = transformVectorToArray(cropContour, npts);
+    const cv::Point *pts = transformVectorToArray(markContour, npts);
 
     // mark polyline
     cv::polylines(image, &pts, &npts, 1, true, markColor);
