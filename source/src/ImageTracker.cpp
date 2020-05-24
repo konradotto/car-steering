@@ -11,9 +11,13 @@ ImageTracker::ImageTracker(const int minRectArea_, const int maxRectArea_) {
 vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
     Mat temp = Mat(detections);
 
-    cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);
+    cv::GaussianBlur(image, detections, cv::Size(3, 3), 2);// smoothen the image using gaussian blur to improve detection perfomance
     vector<vector<Point> > contours;
-    findContours( detections, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );
+   
+    findContours( detections, contours, RETR_TREE, CHAIN_APPROX_SIMPLE );//Canny the image
+    // CV_CHAIN_APPROX_SIMPLE compress the segments of a image, leaving only endpoints. 
+    // A triangle for instance will be compressed until 3 points are left
+    // A rectangle compressed until 4 points are left 
 
     vector<vector<Point> > contours_poly( contours.size() );
     vector<Rect> boundRect( contours.size() );
@@ -30,15 +34,17 @@ vector<Rect> ImageTracker::detectMatches(const Mat &image, Mat &detections) {
 }
 
 void ImageTracker::mergeOverlappingRectangles(vector<Rect> &rectangles) {
-    cv::groupRectangles(rectangles, 0, 1000);
-    recursiveMerge(rectangles);
+    cv::groupRectangles(rectangles, 0, 1000); //group all rectangles
+    recursiveMerge(rectangles);//Send the groupings to recursiveMerge
 }
 
 void ImageTracker::recursiveMerge(vector<Rect> &rectangles) {
+    //If numbers of rectangle for a cone is smaller than 2, nothing needs to be merged
     if (rectangles.size() < 2) {
         return;
     }
-    vector<Rect> mergedRectangles;
+    
+    vector<Rect> mergedRectangles;// temporary array to store the merged rectangles
     vector<bool> usedRectangles(rectangles.size(), false);
     bool mergedSomething = false;
     for (size_t i = 0; i < rectangles.size()-1; ++i) {
@@ -70,10 +76,9 @@ void ImageTracker::filterRectsByArea(vector<Rect> &rectangles, int minArea, int 
     // temporary array to store the results
     vector<Rect> workingArray;
 
-    // iterate the input array and add those with enough area to 
-    for (Rect rect: rectangles) {
+    for (Rect rect: rectangles) {//Iterate the rectangles
         if (rect.area() >= minArea && rect.area() <= maxArea) {
-            workingArray.push_back(rect);
+            workingArray.push_back(rect);//if rectangles are within the constraints push them
         }
     }
 
@@ -82,41 +87,44 @@ void ImageTracker::filterRectsByArea(vector<Rect> &rectangles, int minArea, int 
 }
 
 void ImageTracker::filterRectsByDimensions(vector<Rect> &rectangles, const double widthToHeightRatio) {
-    vector<Rect> rectanglesOut;
-    for (Rect rect: rectangles) {
-        bool goodDimensions = rect.width < widthToHeightRatio*rect.height;
+    // temporary array to store the rectangles
+    vector<Rect> rectanglesOut; 
+    
+    for (Rect rect: rectangles) {//Iterate the rectangles
+        bool goodDimensions = rect.width < widthToHeightRatio*rect.height;//The width is smaller than the rectangle height
 
-        if (goodDimensions) {
-            rectanglesOut.push_back(rect);
+        if (goodDimensions) {//If true
+            rectanglesOut.push_back(rect);//push the rectangles, otherwise dont register them 
         }
     }
-
+    //Return all rectangles from the array
     rectangles = rectanglesOut;    
 }
 
 void ImageTracker::run(const Mat &image, vector<Rect> &rectangles) {
     Mat detections;
-    vector<Rect> matches;
-    matches = detectMatches(image, detections);
+    vector<Rect> matches; // temporary array to store the rectangles
+    matches = detectMatches(image, detections); //Fill array with rectangles that are detected
     
-    mergeOverlappingRectangles(matches);
-    filterRectsByArea(matches, minRectArea, maxRectArea);
-    filterRectsByDimensions(matches);
+    mergeOverlappingRectangles(matches); //Send rectangles to merge overlapping rectangles
+    filterRectsByArea(matches, minRectArea, maxRectArea);//Send rectangles to filter out by area
+    filterRectsByDimensions(matches);//Send rectangles to filter by dimensions
 
-    rectangles = matches;
+    rectangles = matches;//Return the rectangles from the array
 }
 
 void ImageTracker::setMinRectArea(const int minRectArea_) {
-    if (minRectArea_ > 0) {
+    if (minRectArea_ > 0) { //If the area of the rectangle is greater than 0, set it as the area
         minRectArea = minRectArea_;
     } else {
-        minRectArea = 0;
+        minRectArea = 0;// if area is 0, rectangle do not exist
     }
 }
+
 void ImageTracker::setMaxRectArea(const int maxRectArea_) {
-    if (maxRectArea_ > minRectArea) {
-        maxRectArea = maxRectArea_;
+    if (maxRectArea_ > minRectArea) { //If max area of the rectangle is greater than the minimum area
+        maxRectArea = maxRectArea_;//Set max area to be max area
     } else {
-        maxRectArea = 5000;
+        maxRectArea = 5000;//Otherwise, default to an area of 5000
     }
 }
