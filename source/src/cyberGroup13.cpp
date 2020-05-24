@@ -26,44 +26,186 @@
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <cmath>
 
+// Include our classes for image processing
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
 #include "ImageTracker.hpp"
 #include "CsvManager.hpp"
 #include "ImageSaver.hpp"
 
+// use namespaces std and cv (from OpenCV)
 using namespace cv;
 using namespace std;
 
-RNG rng(12345);
-const String TEMPLATE_PATH = "templateCone1.png";
+static const int32_t NO_ERROR               = 0;
+static const int32_t MISSING_CMD_ARGUMENTS  = 1;
 
-void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
+static const int32_t NO_LINES               = 0;
+static const int32_t BLUE_AND_YELLOW_LINE   = 1;
+static const int32_t BLUE_LINE_ONLY         = 2;
+static const int32_t YELLOW_LINE_ONLY       = 3;
+
+static const double ANGLE_UPPER_LIMIT       = 0.152;
+
+bool missingCommandLineArguments(auto arguments, char *argv[]);
+void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height); // function to create a contour for cropping out the vehicle
 Point calcPoint(Rect rect);
-double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones);
 bool intersection(Vec4i line, Point &x);
 double cross(Point v1,Point v2);
+int checkIntersections(vector<Vec4i> bLines, vector<Vec4i> yLines, Point &interPoint1, Point &interPoint2);
 double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines);
 void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point> &bPoints,const vector<Point> &yPoints, Mat mat);
 void calcOffset(const Vec4i &line,const Point intersection, int &xOffset, int &yOffset);
-double stabilizedGSR(double nGsr);
 
 
 const Point heading0 = {320,270};
 const Point heading1 = {320,360};
 Point ix = {0,0};
-double currentAngle;
-//const double intersectionDistance = 70;
 
 int32_t main(int32_t argc, char **argv) {
-    int32_t retCode{1};
     uint32_t ts = 0;
-    // Parse the command line parameters as we require the user to specify some mandatory information on startup.
+
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
-    if ( (0 == commandlineArguments.count("cid")) ||
-         (0 == commandlineArguments.count("name")) ||
-         (0 == commandlineArguments.count("width")) ||
-         (0 == commandlineArguments.count("height")) ) {
+
+    // if parsing the command line arguments returns an error, end main with error code
+    if (missingCommandLineArguments(commandlineArguments, argv)) {
+        return MISSING_CMD_ARGUMENTS;
+    }
+    
+    // Extract the values from the command line parameters
+    const std::string NAME{commandlineArguments["name"]};
+    const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
+    const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
+    const bool VERBOSE{commandlineArguments.count("verbose") != 0};
+
+    // Attach to the shared memory.
+    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
+    if (sharedMemory && sharedMemory->valid()) {
+        std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
+
+        // Interface to a running OpenDaVINCI session where network messages are exchanged.
+        // The instance od4 allows you to send and receive messages.
+        cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
+
+        ImageCropper imageCropper = ImageCropper();
+        const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));//size of upper rectangle
+        std::vector<cv::Point> vehicleContour;
+        initVehicleContour(vehicleContour, WIDTH, HEIGHT);//Call function for outlining out the vehicle contour
+
+        ImageTracker coneTracker = ImageTracker(0);
+
+        CsvManager::refresh();  //clean the directory & create a csv file
+
+        opendlv::proxy::GroundSteeringRequest gsr;
+        mutex gsrMutex;
+        auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
+            // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
+            // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
+            lock_guard<std::mutex> lck(gsrMutex);
+            gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+            //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
+        };
+        od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+
+
+        // Endless loop; end the program by pressing Ctrl-C.
+        while (od4.isRunning()) {
+            // OpenCV data structure to hold an image.
+            cv::Mat img;
+
+            // Wait for a notification of a new frame.
+            sharedMemory->wait();
+
+            // Lock the shared memory.
+            sharedMemory->lock();
+            
+            {
+                // Copy the pixels from the shared memory into our own data structure.
+                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
+                img = wrapped.clone();
+            } 
+            ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);  // get the timestamp from shared memory
+            sharedMemory->unlock();
+            
+            // crop image
+            imageCropper.setImage(img);
+            imageCropper.cropRectangle(aboveHorizon);   // Crop the upper rectangle
+            imageCropper.cropPolygon(vehicleContour);   // Crop the vehicle
+
+            // apply hsv-filter and canny edge detection
+            Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
+            Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+
+            // detect cones in blue and yellow image
+            cv::Point blueCone, yellowCone, orangeCone;
+            vector<Rect> rectBlue, rectYellow;
+            coneTracker.setMinRectArea(75);
+            coneTracker.run(blueEdges, rectBlue);
+            coneTracker.run(yellowEdges, rectYellow);
+            
+
+            vector<Point> yPoints,bPoints; //Array storing yellow points and blue points
+            for (size_t k = 0; k<rectYellow.size(); k++){
+                yPoints.push_back(calcPoint(rectYellow[k]));
+            }
+            for (size_t j=0;j<rectBlue.size();j++){
+                bPoints.push_back(calcPoint(rectBlue[j]));
+            }
+
+            // calculate houghLines
+            vector<Vec4i> bLines,yLines;
+            houghLines(bLines,yLines,bPoints,yPoints,blueEdges);
+
+            // calculate a ground steering request based on houghLines
+            double gsr1 = calcGSR(bLines,yLines);
+
+            // Display images on your screen.
+            if (VERBOSE) {
+
+                // plot yellow lines
+                for(size_t i = 0; i < yLines.size(); i++){
+                    line( img, Point(yLines[i][0], yLines[i][1]),
+                        Point(yLines[i][2], yLines[i][3]), Scalar(0,0,255), 3, 8 );
+                        break;
+                }
+
+                // plot blue lines
+                for(size_t i = 0; i < bLines.size(); i++){
+                    line(img, Point(bLines[i][0], bLines[i][1]),
+                        Point(bLines[i][2], bLines[i][3]), 
+                        Scalar(0,0,255), 3, 8);
+                        break;
+                }
+                
+                // plot current direction
+                line(img, heading0, heading1, Scalar(0,255,255), 3, 8);
+                if (ix.x != 0 && ix.y != 0){
+                    circle(img, ix, 3, {255,0,0}, CV_FILLED);       // plot a circle for the intersection
+                }
+
+                cv::imshow("/tmp/img/full", img);       // show the image
+                cv::waitKey(1);
+            }
+
+            // store values for current frame in csv file
+            CsvManager::add(ts, gsr.groundSteering(), gsr1);
+
+            // print the desired output to console
+            std::clog << "group_13;" << ts << ";" << gsr1 << std::endl;
+        }
+    }
+    
+    return NO_ERROR;
+}
+
+bool missingCommandLineArguments(auto arguments, char *argv[]) {
+    bool missingArguments = false;
+
+    // Print error message if any required argument is missing
+    if ( (0 == arguments.count("cid")) ||
+         (0 == arguments.count("name")) ||
+         (0 == arguments.count("width")) ||
+         (0 == arguments.count("height")) ) {
         std::cerr << argv[0] << " attaches to a shared memory area containing an ARGB image." << std::endl;
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> --name=<name of shared memory area> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
@@ -71,134 +213,19 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "         --width:  width of the frame" << std::endl;
         std::cerr << "         --height: height of the frame" << std::endl;
         std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
+        missingArguments = true;
     }
-    else {
-        // Extract the values from the command line parameters
-        const std::string NAME{commandlineArguments["name"]};
-        const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
-        const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
-        const bool VERBOSE{commandlineArguments.count("verbose") != 0};
 
-        // Attach to the shared memory.
-        std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
-        if (sharedMemory && sharedMemory->valid()) {
-            std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
-
-            // Interface to a running OpenDaVINCI session where network messages are exchanged.
-            // The instance od4 allows you to send and receive messages.
-            cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
-
-            ImageCropper imageCropper = ImageCropper();
-            const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
-            std::vector<cv::Point> vehicleContour;
-            initVehicleContour(vehicleContour, WIDTH, HEIGHT);
-
-            ImageTracker coneTracker = ImageTracker(TEMPLATE_PATH, 0);
-
-            CsvManager::refresh();  //clean the directory & create a csv file
-
-            opendlv::proxy::GroundSteeringRequest gsr;
-            mutex gsrMutex;
-            auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
-                // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
-                // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
-                lock_guard<std::mutex> lck(gsrMutex);
-                gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
-            };
-            od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
-
-
-            // Endless loop; end the program by pressing Ctrl-C.
-            while (od4.isRunning()) {
-                // OpenCV data structure to hold an image.
-                cv::Mat img;
-
-                // Wait for a notification of a new frame.
-                sharedMemory->wait();
-
-                // Lock the shared memory.
-                sharedMemory->lock();
-                
-                {
-                    // Copy the pixels from the shared memory into our own data structure.
-                    cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
-                    img = wrapped.clone();
-                } 
-                ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
-                // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
-                sharedMemory->unlock();
-                
-                
-                // ImageSaver::run(img, aboveHorizon, vehicleContour);
-                
-                imageCropper.setImage(img);
-                imageCropper.cropRectangle(aboveHorizon);
-                imageCropper.cropPolygon(vehicleContour);
-
-                Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
-                Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
-
-                cv::Point blueCone, yellowCone, orangeCone;
-                vector<Rect> rectBlue, rectYellow;
-                coneTracker.setMinRectArea(75);
-                coneTracker.run(blueEdges, rectBlue);
-                coneTracker.run(yellowEdges, rectYellow);
-                
-
-                vector<Point> yPoints,bPoints;
-                for (size_t k = 0; k<rectYellow.size(); k++){
-                    yPoints.push_back(calcPoint(rectYellow[k]));
-                }
-                for (size_t j=0;j<rectBlue.size();j++){
-                    bPoints.push_back(calcPoint(rectBlue[j]));
-                }
-                vector<Vec4i> bLines,yLines;
-                houghLines(bLines,yLines,bPoints,yPoints,blueEdges);
-                double gsr1 = calcGSR(bLines,yLines);
-                CsvManager::add(ts, gsr.groundSteering(), gsr1);
-                currentAngle = gsr1;
-                // Display images on your screen.
-                if (VERBOSE) {
-
-                    for(size_t i = 0; i < yLines.size(); i++){
-                        line( img, Point(yLines[i][0], yLines[i][1]),
-                            Point(yLines[i][2], yLines[i][3]), Scalar(0,0,255), 3, 8 );
-                            break;
-                    }
-                    for(size_t i = 0; i < bLines.size(); i++){
-                        line(img, Point(bLines[i][0], bLines[i][1]),
-                            Point(bLines[i][2], bLines[i][3]), 
-                            Scalar(0,0,255), 3, 8);
-                            break;
-                    }
-                    
-                    line(img, heading0, heading1, Scalar(0,255,255), 3, 8);
-                    if (ix.x != 0 && ix.y != 0){
-                        circle(img, ix, 3, {255,0,0}, CV_FILLED);
-                    }
-                    
-                    /*
-                    for( size_t i = 0; i < rectBlue.size(); i++ ) {
-                        rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
-                    }                     
-                    
-                    color = cv::Scalar(0,255,255);
-                    for( size_t i = 0; i < rectYellow.size(); i++ ) {
-                        rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
-                    } 
-                    */
-
-                    cv::imshow("/tmp/img/full", img);
-                    cv::waitKey(1);
-                }
-            }
-        }
-        retCode = 0;
-    }
-    return retCode;
+    return missingArguments;
 }
 
+/** 
+ * Set the outline of the vehicle within the camera feed
+ * 
+ * @param vehicleContour[out] Vector of points that make up the outline of the vehicle
+ * @param width[in] width of the camera image in pixels
+ * @param height[in] height of the camerea image in pixels
+ */
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height) {
     vehicleContour.push_back(cv::Point(0, height));
     vehicleContour.push_back(cv::Point(0, 423));
@@ -219,32 +246,25 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(width, 427));
     vehicleContour.push_back(cv::Point(width, height));
 }
-/*
-double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
-{
-    double leftSlope=(double)(leftCones[1].y-leftCones[0].y)/(double)(leftCones[1].x-leftCones[0].x);
-    //The line format: Y=leftSlope*(X-X0)+X0
-    double rightSlope=(double)(rightCones[1].y-rightCones[0].y)/(double)(rightCones[1].x-rightCones[0].x);
-    //The line format: Y=rightSlope*(X-X0)+X0
-    int middleOfTheCar=320;//I don't know the proper number yet
-    int horizion=70;//I don't know the proper number yet
-    double leftLaneIntersection=leftSlope*(middleOfTheCar-leftCones[0].x)+leftCones[0].x;
-    double rightLaneIntersection=rightSlope*(middleOfTheCar-rightCones[0].x)+rightCones[0].x;
-    if(leftLaneIntersection>horizion||rightLaneIntersection>horizion)
-        if(leftLaneIntersection>rightLaneIntersection)
-            return -leftLaneIntersection*0.0005;
-        else
-            return rightLaneIntersection*0.0005;
-    return 0;
-}
-*/
 
+/**
+ * Calculate the Point for further computations given a rectangle outlining a cone's position
+ * 
+ * @param rect[in] Rectangle for which the position shall be returned as point
+ * @return Point locating the rectangle
+ */
 Point calcPoint(Rect rect){
     Point n = (rect.br() + rect.tl()) * 0.5;
     return {n.x, rect.br().y};
 }
 
-
+/**
+ * Calculate the intersection of a line and the middle line
+ * 
+ * @param line[in] Line for which the intersection should be determined
+ * @param point[out] Parameter for returning the intersection
+ * @return boolean specifying whether there is a proper intersection
+ */
 bool intersection(Vec4i line, Point &x)
 {
     Point lineP0 = {line[0],line[1]};
@@ -252,21 +272,36 @@ bool intersection(Vec4i line, Point &x)
     Point r(heading1-heading0);
     Point s(lineP1-lineP0);
 
-    if(cross(r,s) == 0) {return false;}
+    if(abs(cross(r,s) - 0.0) <= 0.0000001) {return false;}
 
     double t = cross(lineP0-heading0,s)/cross(r,s);
 
     x = heading0 + t*r;
     ix = x;
     return (x.y >= heading0.y && x.y <= heading1.y);
-    //return (norm(Mat(x),Mat(heading1)) <= intersectionDistance);
 }
 
-double cross(Point v1,Point v2){
+/**
+ * Calculate the cross-product of 2 2D points
+ * 
+ * @param v1 vector of the first point
+ * @param v2 vector of the second point
+ * @return value of the cross-product
+ */
+double cross(Point v1, Point v2){
     return v1.x*v2.y - v1.y*v2.x;
 }
 
-void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point> &bPoints,const vector<Point> &yPoints, Mat mat){
+/**
+ * Calculate houghlines given locations of cones
+ * 
+ * @param bLines[out] parameter to return the yellow hough line
+ * @param yLines[out] parameter to return the blue hough line
+ * @param bPoints[in] locations of blue cones
+ * @param yPoints[in] location of yellow cones
+ * @param mat[in] matrix/image to calculate the hough line for
+ */
+void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines, const vector<Point> &bPoints, const vector<Point> &yPoints, Mat mat){
     mat = Scalar(0,0,0);
     polylines(mat,bPoints,false,Scalar(255,255,255),2,150,0);
     HoughLinesP(mat, bLines, 1, CV_PI/180, 10, 10, 10);
@@ -275,47 +310,85 @@ void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point>
     HoughLinesP(mat, yLines, 1, CV_PI/180, 10, 10, 10);
 }
 
-double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines){
-    
-    int x = (bLines.size()>0 && yLines.size()>0)?1:(bLines.size()>0)?2:(yLines.size()>0)?3:0;
-    int xOffset = 0 , yOffset = 1;
-    Point intersectionPoint,intersectionPoint2;
-    switch (x)
-    {
-    case 1:
-        if (intersection(bLines[0],intersectionPoint) && intersection(yLines[0],intersectionPoint2)){
-            double distBlue = norm(Mat(heading1),Mat(intersectionPoint));
-            double distYellow = norm(Mat(heading1),Mat(intersectionPoint2));
-            calcOffset(distBlue<distYellow?bLines[0]:yLines[0],distBlue<distYellow?intersectionPoint:intersectionPoint2,xOffset,yOffset);
-            break;
-        }
-        else if(intersection(bLines[0],intersectionPoint)){
-            calcOffset(bLines[0],intersectionPoint,xOffset,yOffset);
-        }
-        else if (intersection(yLines[0],intersectionPoint)){
-            calcOffset(yLines[0],intersectionPoint,xOffset,yOffset);
-        }
-        break;
-    case 2:
-        if(intersection(bLines[0],intersectionPoint)){
-            calcOffset(bLines[0],intersectionPoint,xOffset,yOffset);
-        }
-        break;
-    case 3:
-        if(intersection(yLines[0],intersectionPoint)){
-            calcOffset(yLines[0],intersectionPoint,xOffset,yOffset);
-        }
-        break;
-    default:
-        break;
-    }
-    double theta = atan2(yOffset,xOffset);  //# angle (in radian) to center vertical line
-    return ((theta>1||theta<-1)?0:(theta<-0.3?-0.3:theta>0.3?0.3:theta));
-    
+/** Check which houghLines (blue, yellow, both, or none) intersect with the middle line
+ * 
+ * @param bLines[in] blue hough line
+ * @param yLines[in] yellow hough line
+ * @param interPoint1[out] param to return the first intersection point if any
+ * @param interPoint2[out] param to return a second intersection point if existing
+ * @return Integer determining what case of intersections this example is 
+ */
+int checkIntersections(vector<Vec4i> bLines, vector<Vec4i> yLines, Point &interPoint1, Point &interPoint2) {
+    int intersections = NO_LINES;
+    int bSize = bLines.size();
+    int ySize = yLines.size();
 
+    // if blue and yellow houghLine intersect with middle line, calculate two intersection points
+    if (bSize > 0 && ySize > 0 && intersection(bLines[0], interPoint1) && intersection(yLines[0], interPoint2)) {
+        intersections = BLUE_AND_YELLOW_LINE;
+    
+    // calculate intersection point of blue line and middle line if it exists (and yellow line does not intersect)
+    } else if (bSize > 0 && intersection(bLines[0], interPoint1)) {
+        intersections = BLUE_LINE_ONLY;
+
+    // calculate intersection point of yellow line and middle line if it exists (and blue line does not intersect)
+    } else if (ySize > 0 && intersection(yLines[0], interPoint1)) {
+        intersections = YELLOW_LINE_ONLY;    
+    } 
+    
+    return intersections;
 }
 
-void calcOffset(const Vec4i &line,const Point intersection, int &xOffset, int &yOffset){
+/**
+ * Calculate the ground steering angle/request
+ * 
+ * @param bLines Vector for blue houghLines
+ * @param yLines Vector for yellow houghLines
+ * @return the calculated ground steering angle/request
+ */
+double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines){
+    
+    int xOffset = 0 , yOffset = 1;
+    Point intersectionPoint1, intersectionPoint2;
+    double distBlue, distYellow;
+
+    switch (checkIntersections(bLines, yLines, intersectionPoint1, intersectionPoint2)) {
+        case BLUE_AND_YELLOW_LINE:
+            distBlue = norm(Mat(heading1), Mat(intersectionPoint1));
+            distYellow = norm(Mat(heading1), Mat(intersectionPoint2));
+            calcOffset(distBlue<distYellow ? bLines[0] : yLines[0], distBlue<distYellow ? intersectionPoint1 : intersectionPoint2, xOffset, yOffset);
+            break;
+        case BLUE_LINE_ONLY:
+            calcOffset(bLines[0], intersectionPoint1, xOffset, yOffset);
+            break;
+        case YELLOW_LINE_ONLY:
+            calcOffset(yLines[0], intersectionPoint1, xOffset, yOffset);
+            break;
+        default:
+            break;
+    }
+    double theta = atan2(yOffset, xOffset);  // angle (in radian) to center vertical line
+
+    // filter out extreme values calculated for theta
+    double absTheta = abs(theta);
+    if (absTheta > 1) {
+        theta = 0;
+    } else if (absTheta > ANGLE_UPPER_LIMIT) {
+        theta = copysign(ANGLE_UPPER_LIMIT, theta);     // limit to max 
+    }
+
+    return theta;
+}
+
+/**
+ * Calculate the vertical and horizontal offset between a line and a point
+ * 
+ * @param line[in] line for which we want to calculate the offset
+ * @param intersection[in] intersection point of that line
+ * @param xOffset[out] field to return the xOffset
+ * @param yOffset[out] field to return the yOffset
+ */
+void calcOffset(const Vec4i &line, const Point intersection, int &xOffset, int &yOffset){
     xOffset = line[2] - intersection.x;
     yOffset = line[3] - intersection.y;
 }

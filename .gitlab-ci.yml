@@ -26,7 +26,6 @@ variables:
   BUILDX_URL: https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
   BUILDX_PLATFORM: linux/amd64,linux/arm64,linux/arm/v7
   BUILDX_BUILDER: cyberGroup13
-  IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
 
 
 services:
@@ -70,7 +69,9 @@ release:
     refs:
       - tags
     variables:
-      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
+      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
     - mkdir -p $HOME/.docker/cli-plugins/
     - wget -O $HOME/.docker/cli-plugins/docker-buildx $BUILDX_URL
@@ -81,6 +82,7 @@ release:
     - docker buildx inspect --bootstrap ${BUILDX_BUILDER}
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --push "."
+    - echo "${IMAGE}"
+    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --push .
   when: on_success
     
