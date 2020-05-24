@@ -69,12 +69,11 @@ release:
     refs:
       - tags
     variables:
-      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
-      
+      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  
   variables:
     IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-    
   before_script:
+    - echo "${IMAGE}"
     - mkdir -p $HOME/.docker/cli-plugins/
     - wget -O $HOME/.docker/cli-plugins/docker-buildx $BUILDX_URL
     - chmod a+x $HOME/.docker/cli-plugins/docker-buildx
@@ -84,6 +83,7 @@ release:
     - docker buildx inspect --bootstrap ${BUILDX_BUILDER}
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
+    - - echo "${IMAGE}"
     - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --push "."
   when: on_success
     
