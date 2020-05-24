@@ -157,6 +157,7 @@ int32_t main(int32_t argc, char **argv) {
                 double gsr1 = calcGSR(bLines,yLines);
                 CsvManager::add(ts, gsr.groundSteering(), gsr1);
                 currentAngle = gsr1;
+
                 // Display images on your screen.
                 if (VERBOSE) {
 
@@ -176,21 +177,14 @@ int32_t main(int32_t argc, char **argv) {
                     if (ix.x != 0 && ix.y != 0){
                         circle(img, ix, 3, {255,0,0}, CV_FILLED);
                     }
-                    
-                    /*
-                    for( size_t i = 0; i < rectBlue.size(); i++ ) {
-                        rectangle( img, rectBlue[i].tl(), rectBlue[i].br(), color, 2 );   
-                    }                     
-                    
-                    color = cv::Scalar(0,255,255);
-                    for( size_t i = 0; i < rectYellow.size(); i++ ) {
-                        rectangle( img, rectYellow[i].tl(), rectYellow[i].br(), color, 2 );   
-                    } 
-                    */
 
                     cv::imshow("/tmp/img/full", img);
                     cv::waitKey(1);
                 }
+
+
+                // print the desired output to console
+                std::clog << "group_13;" << ts << ";" << gsr1 << std::endl;
             }
         }
         retCode = 0;
@@ -219,25 +213,6 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(width, 427));
     vehicleContour.push_back(cv::Point(width, height));
 }
-/*
-double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones)
-{
-    double leftSlope=(double)(leftCones[1].y-leftCones[0].y)/(double)(leftCones[1].x-leftCones[0].x);
-    //The line format: Y=leftSlope*(X-X0)+X0
-    double rightSlope=(double)(rightCones[1].y-rightCones[0].y)/(double)(rightCones[1].x-rightCones[0].x);
-    //The line format: Y=rightSlope*(X-X0)+X0
-    int middleOfTheCar=320;//I don't know the proper number yet
-    int horizion=70;//I don't know the proper number yet
-    double leftLaneIntersection=leftSlope*(middleOfTheCar-leftCones[0].x)+leftCones[0].x;
-    double rightLaneIntersection=rightSlope*(middleOfTheCar-rightCones[0].x)+rightCones[0].x;
-    if(leftLaneIntersection>horizion||rightLaneIntersection>horizion)
-        if(leftLaneIntersection>rightLaneIntersection)
-            return -leftLaneIntersection*0.0005;
-        else
-            return rightLaneIntersection*0.0005;
-    return 0;
-}
-*/
 
 Point calcPoint(Rect rect){
     Point n = (rect.br() + rect.tl()) * 0.5;
