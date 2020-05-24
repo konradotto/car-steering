@@ -219,7 +219,13 @@ bool missingCommandLineArguments(auto arguments, char *argv[]) {
     return missingArguments;
 }
 
-// Vehicle point outline
+/** 
+ * Set the outline of the vehicle within the camera feed
+ * 
+ * @param vehicleContour[out] Vector of points that make up the outline of the vehicle
+ * @param width[in] width of the camera image in pixels
+ * @param height[in] height of the camerea image in pixels
+ */
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height) {
     vehicleContour.push_back(cv::Point(0, height));
     vehicleContour.push_back(cv::Point(0, 423));
@@ -241,12 +247,24 @@ void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int h
     vehicleContour.push_back(cv::Point(width, height));
 }
 
+/**
+ * Calculate the Point for further computations given a rectangle outlining a cone's position
+ * 
+ * @param rect[in] Rectangle for which the position shall be returned as point
+ * @return Point locating the rectangle
+ */
 Point calcPoint(Rect rect){
     Point n = (rect.br() + rect.tl()) * 0.5;
     return {n.x, rect.br().y};
 }
 
-
+/**
+ * Calculate the intersection of a line and the middle line
+ * 
+ * @param line[in] Line for which the intersection should be determined
+ * @param point[out] Parameter for returning the intersection
+ * @return boolean specifying whether there is a proper intersection
+ */
 bool intersection(Vec4i line, Point &x)
 {
     Point lineP0 = {line[0],line[1]};
@@ -263,11 +281,27 @@ bool intersection(Vec4i line, Point &x)
     return (x.y >= heading0.y && x.y <= heading1.y);
 }
 
-double cross(Point v1,Point v2){
+/**
+ * Calculate the cross-product of 2 2D points
+ * 
+ * @param v1 vector of the first point
+ * @param v2 vector of the second point
+ * @return value of the cross-product
+ */
+double cross(Point v1, Point v2){
     return v1.x*v2.y - v1.y*v2.x;
 }
 
-void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point> &bPoints,const vector<Point> &yPoints, Mat mat){
+/**
+ * Calculate houghlines given locations of cones
+ * 
+ * @param bLines[out] parameter to return the yellow hough line
+ * @param yLines[out] parameter to return the blue hough line
+ * @param bPoints[in] locations of blue cones
+ * @param yPoints[in] location of yellow cones
+ * @param mat[in] matrix/image to calculate the hough line for
+ */
+void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines, const vector<Point> &bPoints, const vector<Point> &yPoints, Mat mat){
     mat = Scalar(0,0,0);
     polylines(mat,bPoints,false,Scalar(255,255,255),2,150,0);
     HoughLinesP(mat, bLines, 1, CV_PI/180, 10, 10, 10);
@@ -276,15 +310,28 @@ void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point>
     HoughLinesP(mat, yLines, 1, CV_PI/180, 10, 10, 10);
 }
 
+/** Check which houghLines (blue, yellow, both, or none) intersect with the middle line
+ * 
+ * @param bLines[in] blue hough line
+ * @param yLines[in] yellow hough line
+ * @param interPoint1[out] param to return the first intersection point if any
+ * @param interPoint2[out] param to return a second intersection point if existing
+ * @return Integer determining what case of intersections this example is 
+ */
 int checkIntersections(vector<Vec4i> bLines, vector<Vec4i> yLines, Point &interPoint1, Point &interPoint2) {
     int intersections = NO_LINES;
     int bSize = bLines.size();
     int ySize = yLines.size();
 
+    // if blue and yellow houghLine intersect with middle line, calculate two intersection points
     if (bSize > 0 && ySize > 0 && intersection(bLines[0], interPoint1) && intersection(yLines[0], interPoint2)) {
         intersections = BLUE_AND_YELLOW_LINE;
+    
+    // calculate intersection point of blue line and middle line if it exists (and yellow line does not intersect)
     } else if (bSize > 0 && intersection(bLines[0], interPoint1)) {
         intersections = BLUE_LINE_ONLY;
+
+    // calculate intersection point of yellow line and middle line if it exists (and blue line does not intersect)
     } else if (ySize > 0 && intersection(yLines[0], interPoint1)) {
         intersections = YELLOW_LINE_ONLY;    
     } 
@@ -292,14 +339,18 @@ int checkIntersections(vector<Vec4i> bLines, vector<Vec4i> yLines, Point &interP
     return intersections;
 }
 
-// Calculate the ground steering angle/request
+/**
+ * Calculate the ground steering angle/request
+ * 
+ * @param bLines Vector for blue houghLines
+ * @param yLines Vector for yellow houghLines
+ * @return the calculated ground steering angle/request
+ */
 double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines){
     
-    //int availableLines = (bLines.size() > 0 && yLines.size()>0) ? 1:(bLines.size()>0)?2:(yLines.size()>0)?3:0;
     int xOffset = 0 , yOffset = 1;
     Point intersectionPoint1, intersectionPoint2;
     double distBlue, distYellow;
-
 
     switch (checkIntersections(bLines, yLines, intersectionPoint1, intersectionPoint2)) {
         case BLUE_AND_YELLOW_LINE:
@@ -329,7 +380,14 @@ double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines){
     return theta;
 }
 
-// calculate the vertical and horizontal offset between a line and a point
+/**
+ * Calculate the vertical and horizontal offset between a line and a point
+ * 
+ * @param line[in] line for which we want to calculate the offset
+ * @param intersection[in] intersection point of that line
+ * @param xOffset[out] field to return the xOffset
+ * @param yOffset[out] field to return the yOffset
+ */
 void calcOffset(const Vec4i &line, const Point intersection, int &xOffset, int &yOffset){
     xOffset = line[2] - intersection.x;
     yOffset = line[3] - intersection.y;

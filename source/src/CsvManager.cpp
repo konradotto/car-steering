@@ -5,16 +5,16 @@
 
 using namespace std;
 
-const char* CsvManager::path = "csv/reports.csv";
-const char CsvManager::delimiter = ';';
+const char* CsvManager::path = "csv/reports.csv"; // Path to report
+const char CsvManager::delimiter = ';'; // Column separator
 
-//restore csv file
+// restore csv file
 void CsvManager::refresh() {
-    remove(CsvManager::path);//Remove the report.csv if it already exists
+    remove(CsvManager::path); // Remove the report.csv if it already exists
     ofstream ofile;
-    ofile.open(CsvManager::path);//open a new outputstream to csv/report.csv
-    ofile << "time_stamp" << delimiter << "ground_steering_0" << delimiter << "ground_steering_1" << delimiter << endl;//add column titles
-    ofile.close(); //close outputstream
+    ofile.open(CsvManager::path);   // open a new outputstream to csv/report.csv
+    ofile << "time_stamp" << delimiter << "ground_steering_0" << delimiter << "ground_steering_1" << delimiter << endl;     // add column titles
+    ofile.close();  // close outputstream
 }
 
 void CsvManager::add(uint32_t ts, double gr0, double gr1) {
