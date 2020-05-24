@@ -26,43 +26,167 @@
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <cmath>
 
+// Include our classes for image processing
 #include "ImageCropper.hpp"
 #include "ImageFilter.hpp"
 #include "ImageTracker.hpp"
 #include "CsvManager.hpp"
 #include "ImageSaver.hpp"
 
+// use namespaces std and cv (from OpenCV)
 using namespace cv;
 using namespace std;
 
-RNG rng(12345);
+static const int32_t MISSING_CMD_ARGUMENTS = 1;
+static const int32_t NO_ERROR = 0;
 
-void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height);
+bool missingCommandLineArguments(auto arguments, char *argv[]);
+void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height); // function to create a contour for cropping out the vehicle
 Point calcPoint(Rect rect);
-double getSteeringAngle(vector<Point> &leftCones,vector<Point> &rightCones);
 bool intersection(Vec4i line, Point &x);
 double cross(Point v1,Point v2);
 double calcGSR(vector<Vec4i> bLines, vector<Vec4i> yLines);
 void houghLines(vector<Vec4i> &bLines, vector<Vec4i> &yLines,const vector<Point> &bPoints,const vector<Point> &yPoints, Mat mat);
 void calcOffset(const Vec4i &line,const Point intersection, int &xOffset, int &yOffset);
-double stabilizedGSR(double nGsr);
 
 
 const Point heading0 = {320,270};
 const Point heading1 = {320,360};
 Point ix = {0,0};
-double currentAngle;
-//const double intersectionDistance = 70;
 
 int32_t main(int32_t argc, char **argv) {
-    int32_t retCode{1};
     uint32_t ts = 0;
-    // Parse the command line parameters as we require the user to specify some mandatory information on startup.
+
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
-    if ( (0 == commandlineArguments.count("cid")) ||
-         (0 == commandlineArguments.count("name")) ||
-         (0 == commandlineArguments.count("width")) ||
-         (0 == commandlineArguments.count("height")) ) {
+
+    // if parsing the command line arguments returns an error, end main with error code
+    if (missingCommandLineArguments(commandlineArguments, argv)) {
+        return MISSING_CMD_ARGUMENTS;
+    }
+    
+    // Extract the values from the command line parameters
+    const std::string NAME{commandlineArguments["name"]};
+    const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
+    const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
+    const bool VERBOSE{commandlineArguments.count("verbose") != 0};
+
+    // Attach to the shared memory.
+    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
+    if (sharedMemory && sharedMemory->valid()) {
+        std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
+
+        // Interface to a running OpenDaVINCI session where network messages are exchanged.
+        // The instance od4 allows you to send and receive messages.
+        cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
+
+        ImageCropper imageCropper = ImageCropper();
+        const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));//size of upper rectangle
+        std::vector<cv::Point> vehicleContour;
+        initVehicleContour(vehicleContour, WIDTH, HEIGHT);
+
+        ImageTracker coneTracker = ImageTracker(0);
+
+        CsvManager::refresh();  //clean the directory & create a csv file
+
+        opendlv::proxy::GroundSteeringRequest gsr;
+        mutex gsrMutex;
+        auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
+            // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
+            // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
+            lock_guard<std::mutex> lck(gsrMutex);
+            gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+            //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
+        };
+        od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+
+
+        // Endless loop; end the program by pressing Ctrl-C.
+        while (od4.isRunning()) {
+            // OpenCV data structure to hold an image.
+            cv::Mat img;
+
+            // Wait for a notification of a new frame.
+            sharedMemory->wait();
+
+            // Lock the shared memory.
+            sharedMemory->lock();
+            
+            {
+                // Copy the pixels from the shared memory into our own data structure.
+                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
+                img = wrapped.clone();
+            } 
+            ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);  // get the timestamp from shared memory
+            sharedMemory->unlock();
+            
+
+            imageCropper.setImage(img);
+            imageCropper.cropRectangle(aboveHorizon);   // Crop the upper rectangle
+            imageCropper.cropPolygon(vehicleContour);   // Crop the vehicle
+
+            Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
+            Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
+
+            cv::Point blueCone, yellowCone, orangeCone;
+            vector<Rect> rectBlue, rectYellow;
+            coneTracker.setMinRectArea(75);
+            coneTracker.run(blueEdges, rectBlue);
+            coneTracker.run(yellowEdges, rectYellow);
+            
+
+            vector<Point> yPoints,bPoints;
+            for (size_t k = 0; k<rectYellow.size(); k++){
+                yPoints.push_back(calcPoint(rectYellow[k]));
+            }
+            for (size_t j=0;j<rectBlue.size();j++){
+                bPoints.push_back(calcPoint(rectBlue[j]));
+            }
+            vector<Vec4i> bLines,yLines;
+            houghLines(bLines,yLines,bPoints,yPoints,blueEdges);
+            double gsr1 = calcGSR(bLines,yLines);
+            CsvManager::add(ts, gsr.groundSteering(), gsr1);
+
+            // Display images on your screen.
+            if (VERBOSE) {
+
+                for(size_t i = 0; i < yLines.size(); i++){
+                    line( img, Point(yLines[i][0], yLines[i][1]),
+                        Point(yLines[i][2], yLines[i][3]), Scalar(0,0,255), 3, 8 );
+                        break;
+                }
+                for(size_t i = 0; i < bLines.size(); i++){
+                    line(img, Point(bLines[i][0], bLines[i][1]),
+                        Point(bLines[i][2], bLines[i][3]), 
+                        Scalar(0,0,255), 3, 8);
+                        break;
+                }
+                
+                line(img, heading0, heading1, Scalar(0,255,255), 3, 8);
+                if (ix.x != 0 && ix.y != 0){
+                    circle(img, ix, 3, {255,0,0}, CV_FILLED);
+                }
+
+                cv::imshow("/tmp/img/full", img);
+                cv::waitKey(1);
+            }
+
+
+            // print the desired output to console
+            std::clog << "group_13;" << ts << ";" << gsr1 << std::endl;
+        }
+    }
+    
+    return NO_ERROR;
+}
+
+bool missingCommandLineArguments(auto arguments, char *argv[]) {
+    bool missingArguments = false;
+
+    // Print error message if any required argument is missing
+    if ( (0 == arguments.count("cid")) ||
+         (0 == arguments.count("name")) ||
+         (0 == arguments.count("width")) ||
+         (0 == arguments.count("height")) ) {
         std::cerr << argv[0] << " attaches to a shared memory area containing an ARGB image." << std::endl;
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> --name=<name of shared memory area> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
@@ -70,126 +194,10 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "         --width:  width of the frame" << std::endl;
         std::cerr << "         --height: height of the frame" << std::endl;
         std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
+        missingArguments = true;
     }
-    else {
-        // Extract the values from the command line parameters
-        const std::string NAME{commandlineArguments["name"]};
-        const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
-        const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
-        const bool VERBOSE{commandlineArguments.count("verbose") != 0};
 
-        // Attach to the shared memory.
-        std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
-        if (sharedMemory && sharedMemory->valid()) {
-            std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
-
-            // Interface to a running OpenDaVINCI session where network messages are exchanged.
-            // The instance od4 allows you to send and receive messages.
-            cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
-
-            ImageCropper imageCropper = ImageCropper();
-            const cv::Rect aboveHorizon = cv::Rect(0, 0, WIDTH, (int) (0.52 * HEIGHT));
-            std::vector<cv::Point> vehicleContour;
-            initVehicleContour(vehicleContour, WIDTH, HEIGHT);
-
-            ImageTracker coneTracker = ImageTracker(0);
-
-            CsvManager::refresh();  //clean the directory & create a csv file
-
-            opendlv::proxy::GroundSteeringRequest gsr;
-            mutex gsrMutex;
-            auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
-                // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
-                // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
-                lock_guard<std::mutex> lck(gsrMutex);
-                gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                //CsvManager::add(ts, gsr.groundSteering(), 0.0,"0");
-            };
-            od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
-
-
-            // Endless loop; end the program by pressing Ctrl-C.
-            while (od4.isRunning()) {
-                // OpenCV data structure to hold an image.
-                cv::Mat img;
-
-                // Wait for a notification of a new frame.
-                sharedMemory->wait();
-
-                // Lock the shared memory.
-                sharedMemory->lock();
-                
-                {
-                    // Copy the pixels from the shared memory into our own data structure.
-                    cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
-                    img = wrapped.clone();
-                } 
-                ts = cluon::time::toMicroseconds(sharedMemory->getTimeStamp().second);
-                // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
-                sharedMemory->unlock();
-                
-                
-                // ImageSaver::run(img, aboveHorizon, vehicleContour);
-                
-                imageCropper.setImage(img);
-                imageCropper.cropRectangle(aboveHorizon);//Crop the upper rectangle
-                imageCropper.cropPolygon(vehicleContour);//Crop the vehicle
-
-                Mat yellowEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::yellowRanges));
-                Mat blueEdges = ImageFilter::filterEdges(ImageFilter::filterColorRange(img, ImageFilter::blueRanges));
-
-                cv::Point blueCone, yellowCone, orangeCone;
-                vector<Rect> rectBlue, rectYellow;
-                coneTracker.setMinRectArea(75);
-                coneTracker.run(blueEdges, rectBlue);
-                coneTracker.run(yellowEdges, rectYellow);
-                
-
-                vector<Point> yPoints,bPoints;
-                for (size_t k = 0; k<rectYellow.size(); k++){
-                    yPoints.push_back(calcPoint(rectYellow[k]));
-                }
-                for (size_t j=0;j<rectBlue.size();j++){
-                    bPoints.push_back(calcPoint(rectBlue[j]));
-                }
-                vector<Vec4i> bLines,yLines;
-                houghLines(bLines,yLines,bPoints,yPoints,blueEdges);
-                double gsr1 = calcGSR(bLines,yLines);
-                CsvManager::add(ts, gsr.groundSteering(), gsr1);
-                currentAngle = gsr1;
-
-                // Display images on your screen.
-                if (VERBOSE) {
-
-                    for(size_t i = 0; i < yLines.size(); i++){
-                        line( img, Point(yLines[i][0], yLines[i][1]),
-                            Point(yLines[i][2], yLines[i][3]), Scalar(0,0,255), 3, 8 );
-                            break;
-                    }
-                    for(size_t i = 0; i < bLines.size(); i++){
-                        line(img, Point(bLines[i][0], bLines[i][1]),
-                            Point(bLines[i][2], bLines[i][3]), 
-                            Scalar(0,0,255), 3, 8);
-                            break;
-                    }
-                    
-                    line(img, heading0, heading1, Scalar(0,255,255), 3, 8);
-                    if (ix.x != 0 && ix.y != 0){
-                        circle(img, ix, 3, {255,0,0}, CV_FILLED);
-                    }
-
-                    cv::imshow("/tmp/img/full", img);
-                    cv::waitKey(1);
-                }
-
-
-                // print the desired output to console
-                std::clog << "group_13;" << ts << ";" << gsr1 << std::endl;
-            }
-        }
-        retCode = 0;
-    }
-    return retCode;
+    return missingArguments;
 }
 
 //Vehicle point outline
