@@ -81,6 +81,7 @@ release:
     - docker buildx inspect --bootstrap ${BUILDX_BUILDER}
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --push "."
+    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --load
+    - docker push
   when: on_success
     
