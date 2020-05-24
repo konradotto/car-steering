@@ -84,6 +84,6 @@ release:
   script:
     - echo "${IMAGE}"
     - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE} --load .
-    - docker push $IMAGE
+    - docker push
   when: on_success
     
