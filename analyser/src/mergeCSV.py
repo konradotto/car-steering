@@ -37,11 +37,14 @@ def mergeCSV():
     f = open("mergedReports.csv","w")
     f.write("time_stamp;ground_steering_0;ground_steering_1;ground_steering_prev;\n")
     count = len(time_stamps) if len(previous_ground_steering_requests) > len(time_stamps) else len(previous_ground_steering_requests)
-    previous_off = count if len(previous_ground_steering_requests) - len(ground_steering_requests) > 0 else 0
-    off = count if len(ground_steering_requests) - len(previous_ground_steering_requests) > 0 else 0
+    previous_off = len(previous_ground_steering_requests) - len(ground_steering_requests) 
+    if previous_off < 0:
+        previous_off = 0
+    off = len(ground_steering_requests) - len(previous_ground_steering_requests) 
+    if off < 0: 
+        off = 0
     for i in range(0, count):
         f.write("{};{};{};{};\n".format(time_stamps[i+off],ground_steering_requests[i+off],calc_ground_steering_requests[i+off],previous_ground_steering_requests[i+previous_off]))
-        i += 1
     f.close()
 
 
