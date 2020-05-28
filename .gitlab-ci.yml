@@ -72,6 +72,7 @@ performance:
     #- wget "https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38131/artifacts/raw/csv/reports.csv" #"https://git.chalmers.se/courses/dit638/students/group_13/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
    # - cat reports.csv
     - ls -a
+    - cat artifacts.zip
     - unzip artifacts.zip
     - ls -a
     - cat csv/reports.csv
