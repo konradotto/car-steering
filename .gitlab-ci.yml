@@ -70,11 +70,12 @@ performance:
     - sleep 50
     - echo ${CI_PROJECT_URL}
     - echo ${CI_PROJECT_ID}
-    - curl --location --output artifacts.zip "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
+    #- curl --location --output artifacts.zip "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
     - unzip artifacts.zip
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
     - killall
+    - done
   artifacts:
     paths: 
       - csv/reports.csv
