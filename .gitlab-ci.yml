@@ -60,8 +60,9 @@ build-and-test:
   #      cobertura: $CI_PROJECT_DIR/coverage/cobertura.xml
 
 performance:
-  stage:
-    test
+  tags:
+    - cool
+  stage: test
   before-script:
     - docker kill $(docker ps -q)
   script:
