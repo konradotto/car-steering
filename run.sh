@@ -1,6 +1,6 @@
 #!/bin/bash
 trap "exit" INT TERM ERR
-trap "kill SIGINT" EXIT
+trap "kill -SIGINT" EXIT
 
 ./run-vehicle-view.sh &
 ./run-decoder.sh &
