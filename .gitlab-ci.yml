@@ -74,12 +74,12 @@ performance:
     #- ls csv/
     #- 'curl --location --output artifacts.csv --header "Authorization: Bearer 7978d66a3ba2007f99f8aac66054fe72" https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/download?job=performance'
     # curl --location --output artifacts.zip "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/feature/28-local-runner/download?job=performance&job_token=$CI_JOB_TOKEN"
-    - 'curl --location --output artifacts.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
+    - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     #- wget "https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38131/artifacts/raw/csv/reports.csv" #"https://git.chalmers.se/courses/dit638/students/group_13/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
    # - cat reports.csv
     #- curl --location --output artifacts.zip https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38162/artifacts/download
     - ls -a
-    - cat artifacts.csv
+    - cat reports.csv
     #- unzip artifacts.zip
     #- ls -a
     - cat csv/reports.csv
