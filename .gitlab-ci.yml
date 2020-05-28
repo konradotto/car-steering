@@ -66,9 +66,9 @@ performance:
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
   script:
-    - ./run.sh
+    #- ./run.sh
     - echo "Test"
-    - python3 analyser/src/analyser.py < csv/reports.csv
+    #- python3 analyser/src/analyser.py < csv/reports.csv
   artifacts:
     paths: 
       - csv/reports.csv
