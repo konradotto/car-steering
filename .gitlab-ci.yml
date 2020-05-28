@@ -72,6 +72,7 @@ performance:
     #- curl --location --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"
     #- wget "https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38131/artifacts/raw/csv/reports.csv" #"https://git.chalmers.se/courses/dit638/students/group_13/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
    # - cat reports.csv
+    - curl --location --output artifacts.zip https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38162/artifacts/download
     - ls -a
     - cat artifacts.zip
     - unzip artifacts.zip

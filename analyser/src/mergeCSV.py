@@ -34,7 +34,7 @@ def populate_prev_data(lines):
         previous_ground_steering_requests.append(pgr)
 
 def mergeCSV():
-    f = open("../../mergedReports.csv","w")
+    f = open("mergedReports.csv","w")
     f.write("time_stamp;ground_steering_0;ground_steering_1;ground_steering_prev;\n")
     count = len(time_stamps) if len(previous_ground_steering_requests) > len(time_stamps) else len(previous_ground_steering_requests)
     previous_off = count if len(previous_ground_steering_requests) - len(ground_steering_requests) > 0 else 0
