@@ -67,7 +67,7 @@ performance:
     - docker build -t sele -f sele/Dockerfile sele/
   script:
     - ./run.sh || true
-    - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/feature/$CI_COMMIT_BRANCH/raw/csv/reports.csv?job=performance"'
+    - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     - cat reports.csv
     - cat csv/reports.csv
     - python3 analyser/src/mergeCSV.py csv/reports.csv reports.csv
