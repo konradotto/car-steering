@@ -1,6 +1,8 @@
 #!/bin/bash
 #trap "exit" INT TERM ERR
 
+set -e
+
 ./run-vehicle-view.sh & 
 ./run-decoder.sh & 
 sleep 10 
