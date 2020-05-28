@@ -63,8 +63,6 @@ performance:
   tags:
     - cool
   stage: test
-  before_script:
-    - docker kill $(docker ps -q)
   script:
     - ./run.sh &
     - sleep 55
@@ -74,6 +72,7 @@ performance:
     - pkill -f run.sh
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
+    - docker kill $(docker ps -q)
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
