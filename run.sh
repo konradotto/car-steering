@@ -9,6 +9,6 @@ docker run -i --rm --net=host sele 2
 sleep 5
 ./run-group13.sh &
 
-sleep 60
+sleep 20
 
 kill SIGTERM
