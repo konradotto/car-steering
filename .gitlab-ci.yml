@@ -63,8 +63,10 @@ performance:
   stage:
     test
   script:
+    cd ../individual/recordings
     ls -a
-    ./run.sh
+    docker run --rm --init --net=host --name=vehicle-view -v $PWD:/opt/vehicle-view/recordings -v /var/run/docker.sock:/var/run/docker.sock -p 8081:8081 chalmersrevere/opendlv-vehicle-view-multi:v0.0.60 &
+
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
