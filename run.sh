@@ -1,12 +1,13 @@
 #!/bin/bash
 #trap "exit" INT TERM ERR
 
-set -e
+selection=$1
+
 
 ./run-vehicle-view.sh & 
 ./run-decoder.sh & 
 sleep 5
-docker run -i --rm --net=host sele 1
+docker run -i --rm --net=host sele $selection
 sleep 5 
 ./run-group13.sh & 
 sleep 90
