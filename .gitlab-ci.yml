@@ -67,11 +67,10 @@ performance:
     - docker kill $(docker ps -q)
   script:
     - ./run.sh &
-    - sleep 45
+    - sleep 55
     - pkill -f run.sh
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
-    - exit 0
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
