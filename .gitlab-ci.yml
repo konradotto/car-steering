@@ -75,7 +75,7 @@ performance:
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
     - jobs
-    - pkill -f run.sh
+    - pkill -f ./run.sh
   artifacts:
     paths: 
       - csv/reports.csv
