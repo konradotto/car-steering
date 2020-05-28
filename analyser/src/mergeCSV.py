@@ -43,6 +43,7 @@ def mergeCSV():
     off = len(ground_steering_requests) - len(previous_ground_steering_requests) 
     if off < 0: 
         off = 0
+        
     for i in range(0, count):
         f.write("{};{};{};{};\n".format(time_stamps[i+off],ground_steering_requests[i+off],calc_ground_steering_requests[i+off],previous_ground_steering_requests[i+previous_off]))
     f.close()
