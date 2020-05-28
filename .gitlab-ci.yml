@@ -70,7 +70,9 @@ performance:
     - python3 analyser/src/analyser.py < csv/reports.csv
     - docker kill $(docker ps -q)
   artifacts:
-    csv: csv/reports.csv
+    paths: 
+      - csv/reports.csv
+    expire_in: 1 week
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
