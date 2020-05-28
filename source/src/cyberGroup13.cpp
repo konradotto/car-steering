@@ -63,7 +63,7 @@ const Point heading1 = {320,360};
 Point ix = {0,0};
 
 int32_t main(int32_t argc, char **argv) {
-    uint32_t ts = 0;
+    int64_t ts = 0;
 
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
 

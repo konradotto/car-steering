@@ -17,7 +17,7 @@ void CsvManager::refresh() {
     ofile.close();  // close outputstream
 }
 
-void CsvManager::add(uint32_t ts, double gr0, double gr1) {
+void CsvManager::add(int64_t ts, double gr0, double gr1) {
     ofstream csv;
     csv.open(CsvManager::path, fstream::app | fstream::out);
     

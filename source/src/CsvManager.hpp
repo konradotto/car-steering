@@ -22,7 +22,7 @@ class CsvManager {
          * @param gr1 double to be added to the file (calculated ground steering request in our application)
          *  
          */
-        static void add(uint32_t ts, double gr0, double gr1);
+        static void add(int64_t ts, double gr0, double gr1);
 };
 
 #endif
