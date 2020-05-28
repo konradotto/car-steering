@@ -63,12 +63,13 @@ performance:
   tags:
     - cool
   stage: build
+  before_script:
+    - docker build -t sele -f sele/Dockerfile sele/
   script:
-    - ./run-vehicle-view.sh &
-    - python3 analyser/src/sele.py 1
-    - sleep 55
+    - ./run.sh
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
+  after_script: 
     - docker kill $(docker ps -q)
   artifacts:
     paths: 
