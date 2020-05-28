@@ -63,7 +63,7 @@ performance:
   tags:
     - cool
   stage: test
-  before-script:
+  before_script:
     - docker kill $(docker ps -q)
   script:
     - ./run.sh &
