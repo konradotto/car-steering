@@ -67,7 +67,7 @@ performance:
     - docker build -t sele -f sele/Dockerfile sele/
   script:
     - ./run.sh & 
-    - sleep 50
+    - sleep 60
     - echo ${CI_PROJECT_URL}
     - echo ${CI_PROJECT_ID}
     #- curl --location --output artifacts.zip "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
@@ -75,6 +75,7 @@ performance:
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
     - kill $!
+    - jobs
     - done
   artifacts:
     paths: 
