@@ -75,7 +75,7 @@ performance:
     - ls && mkdir unzipped && unzip artifacts.zip -d $_
     - ls unzipped
     - cat unzipped/csv/reports.csv
-    - cat csv/report${NR}.csv
+    - cat "csv/report${NR}.csv"
     - python3 analyser/src/mergeCSV.py csv/report${NR}.csv unzipped/csv/reports.csv
     - cat mergedReports.csv
     - python3 analyser/src/analyser.py < mergedReports.csv
