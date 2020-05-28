@@ -7,25 +7,31 @@ import numpy as np
 time_stamps = []
 ground_steering_requests = []
 calc_ground_steering_requests = []
+prev_calc_ground_steering_requests = []
 n = 0
 
 
 def populate_data(lines):
-    global n, calc_ground_steering_requests
+    global n, calc_ground_steering_requests, prev_calc_ground_steering_requests
 
     lines.pop(0) #csv header line
     for line in lines:
-        strs = line.split(';')
+        strs = line.split(';')            
+        prev_recorded = len(strs) > 4
         try:
             ts = int(strs[0])
             gr0 = float(strs[1])
             gr1 = float(strs[2])
+            if (prev_recorded):
+                prev_gr1 = float(strs[3])
         except ValueError:
             print("Error parsing value at line:\n", line)
             continue
         time_stamps.append(ts)
         ground_steering_requests.append(gr0)
         calc_ground_steering_requests.append(gr1)
+        if prev_recorded:
+            prev_calc_ground_steering_requests.append(prev_gr1)
     n = len(time_stamps)
     # calc_ground_steering_requests = [0] * n
 
@@ -48,6 +54,8 @@ def get_lines():
 def plot():
     fig1 = plt.plot(time_stamps, ground_steering_requests, label='Ground Steering Request')
     fig2 = plt.plot(time_stamps, calc_ground_steering_requests, label='Calculated Ground Steering')
+    if (prev_calc_ground_steering_requests):
+        fig3 = plt.plot(time_stamps, prev_calc_ground_steering_requests, label='Previously Calculated Ground Steering')
     # fig3 = plt.plot(time_stamps, [max(ground_steering_requests)]*len(time_stamps), label='max ground steering')
     # fig4 = plt.plot(time_stamps, [min(ground_steering_requests)]*len(time_stamps), label='min ground steering')
     plt.xlabel("Timestamp", fontsize=24)
