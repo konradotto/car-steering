@@ -73,7 +73,7 @@ performance:
     - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/download?job=performance"'
     - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     - ls
-    - unzip artifacts.zip 
+    - unzip artifacts.zip -y
     - ls
     - cat reports.csv
     - cat csv/reports.csv
@@ -97,7 +97,7 @@ release:
     refs:
       - tags
     variables:
-      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
+      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  
   variables:
     IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
