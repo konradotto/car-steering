@@ -66,7 +66,7 @@ performance:
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
   script:
-    - ./run.sh
+    - ./run.sh || true
     - echo ${CI_PROJECT_URL}
     - echo ${CI_PROJECT_ID}
     #- curl --location --output artifacts.zip "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
