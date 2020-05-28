@@ -1,7 +1,11 @@
 build
 *.so
 export/
-csv/
+csv/report1.csv
+csv/report2.csv
+csv/report3.csv
+csv/report4.csv
+csv/report5.csv
 *.vscode
 img/
 builds/
