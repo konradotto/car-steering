@@ -63,7 +63,9 @@ performance:
   stage:
     test
   script: 
-    - ./run.sh
+    - ./run.sh &
+    - sleep 1
+    - echo "Test"
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:

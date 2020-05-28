@@ -3,7 +3,8 @@ trap "exit" INT TERM ERR
 trap "kill 0" EXIT
 
 ./run-vehicle-view.sh &
-sleep 5
 ./run-decoder.sh &
+sleep 10
+./run-group13.sh &
 
 wait
