@@ -10,3 +10,7 @@ sleep 5
 ./run-group13.sh &
 
 sleep 20
+
+pkill -f run-group13
+pkill -f run-decoder
+pkill -f run-vehicle-view
