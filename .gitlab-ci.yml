@@ -69,8 +69,6 @@ performance:
     - ./run.sh
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
-  after_script: 
-    - docker kill $(docker ps -q)
   artifacts:
     paths: 
       - csv/reports.csv
