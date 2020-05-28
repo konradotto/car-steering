@@ -75,7 +75,7 @@ performance:
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
     - jobs
-    - done
+    - kill %1
   artifacts:
     paths: 
       - csv/reports.csv
