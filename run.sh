@@ -1,6 +1,6 @@
 #!/bin/bash
 trap "exit" INT TERM ERR
-trap "kill 0" EXIT
+trap "kill SIGINT" EXIT
 
 ./run-vehicle-view.sh &
 ./run-decoder.sh &
@@ -10,5 +10,3 @@ sleep 5
 ./run-group13.sh &
 
 sleep 20
-
-kill SIGTERM

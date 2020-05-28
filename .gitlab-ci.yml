@@ -68,7 +68,7 @@ performance:
   script:
     #- ./run.sh
     - echo "Test"
-    #- python3 analyser/src/analyser.py < csv/reports.csv
+    - python3 analyser/src/analyser.py < csv/reports.csv
   artifacts:
     paths: 
       - csv/reports.csv
