@@ -52,7 +52,7 @@ def get_lines(file):
     f.close()
 
 if __name__ == '__main__':
-    populate_data(get_lines(argv[1]))
-    populate_prev_data(get_lines(argv[2]))
+    populate_data(get_lines(sys.argv[1]))
+    populate_prev_data(get_lines(sys.argv[2]))
     mergeCSV()
     sys.exit()
