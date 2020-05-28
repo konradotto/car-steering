@@ -62,7 +62,9 @@ build-and-test:
 performance:
   stage:
     test
-  script: 
+  before-script:
+    - docker kill $(docker ps -q)
+  script:
     - ./run.sh &
     - echo "Test"
     - sleep 50
