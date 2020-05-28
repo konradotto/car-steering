@@ -98,6 +98,7 @@ release:
       - tags
     variables:
       - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  v
+  variables:
     IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
     - mkdir -p $HOME/.docker/cli-plugins/
