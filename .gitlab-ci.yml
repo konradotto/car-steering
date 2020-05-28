@@ -64,7 +64,7 @@ performance:
     - cool
   stage: build
   variables:
-    NR: 1
+    NR: "1"
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
     - docker build -t group13:latest -f Dockerfile .
