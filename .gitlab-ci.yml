@@ -64,6 +64,7 @@ performance:
     test
   script:
     ls -a
+    ./run.sh
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
