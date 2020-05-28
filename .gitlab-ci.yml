@@ -66,13 +66,6 @@ performance:
   script:
     - ./run.sh &
     - sleep 55
-    - ps
-    - pkill -f run-group13.sh
-    - sleep 5
-    - pkill -f run-decoder.sh
-    - sleep 5
-    - ps
-    - pkill -f run.sh
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
     - docker kill $(docker ps -q)
