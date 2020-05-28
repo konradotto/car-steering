@@ -10,3 +10,5 @@ sleep 5
 ./run-group13.sh &
 
 sleep 60
+
+kill SIGTERM
