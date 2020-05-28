@@ -71,9 +71,9 @@ performance:
     - docker build -t group13:latest -f Dockerfile .
   script:
     
-    #- 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/download?job=performance"'
-    #- mkdir unzipped && unzip artifacts.zip -d $_
-    
+    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/download?job=performance"'
+    - mkdir unzipped && unzip artifacts.zip -d $_
+    - mkdir charts
     - ./loop-recordings.sh
     #- ./run.sh ${NR} || true
     #- python3 analyser/src/mergeCSV.py csv/report${NR}.csv unzipped/csv/report${NR}.csv
@@ -83,7 +83,7 @@ performance:
   artifacts:
     paths: 
       - csv/
-      #- performancePlot${NR}.png
+      - charts/
     expire_in: 1 week
     when: always
 
