@@ -62,7 +62,7 @@ build-and-test:
 performance:
   tags:
     - cool
-  stage: test
+  stage: build
   script:
     - ./run.sh &
     - sleep 55
