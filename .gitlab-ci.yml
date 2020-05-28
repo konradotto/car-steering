@@ -71,12 +71,12 @@ performance:
   script:
     - ./run.sh ${NR} || true
     - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/download?job=performance"'
-    - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
+    #- 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     - ls && mkdir unzipped && unzip artifacts.zip -d $_
     - ls unzipped
-    - cat unzipped/csv/report${NR}.csv
+    - cat unzipped/csv/reports.csv
     - cat csv/report${NR}.csv
-    - python3 analyser/src/mergeCSV.py csv/report${NR}.csv reports.csv
+    - python3 analyser/src/mergeCSV.py csv/report${NR}.csv unzipped/csv/reports.csv
     - cat mergedReports.csv
     - python3 analyser/src/analyser.py < mergedReports.csv
     - mv performance.png "performancePlot${NR}.png"
