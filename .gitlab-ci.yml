@@ -67,12 +67,15 @@ performance:
     - docker build -t sele -f sele/Dockerfile sele/
   script:
     - ./run.sh || true
-    - curl --location --header "PRIVATE-TOKEN:$CI_JOB_TOKEN" "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"
+    - curl --location --output artifacts.zip --header "JOB-TOKEN:$CI_JOB_TOKEN" "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/feature/28-local-runner/download?job=performance"
+    #- curl --location --header "PRIVATE-TOKEN:$CI_JOB_TOKEN" "$CI_PROJECT_URL/$CI_PROJECT_ID/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"
     #- wget "https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38131/artifacts/raw/csv/reports.csv" #"https://git.chalmers.se/courses/dit638/students/group_13/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
-    - cat ree.csv
+   # - cat reports.csv
+    - ls -a
+    - unzip artifacts.zip
+    - ls -a
     - cat csv/reports.csv
     - python3 analyser/src/mergeCSV.py csv/reports.csv reports.csv
-    - ls -a
     - python3 analyser/src/analyser.py < mergedReports.csv
     - jobs
   artifacts:
