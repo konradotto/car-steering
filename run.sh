@@ -11,8 +11,9 @@ docker run -i --rm --net=host sele $selection
 sleep 5 
 ./run-group13.sh & 
 sleep 20
-mv csv/reports.csv "csv/report${selection}.csv"
 
 pkill -f ./run-group13.sh
 pkill -f ./run-decoder.sh
 pkill -f ./run-vehicle-view.sh
+
+mv csv/reports.csv "csv/report${selection}.csv"
