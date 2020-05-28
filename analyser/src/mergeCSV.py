@@ -5,6 +5,7 @@ ground_steering_requests = []
 calc_ground_steering_requests = []
 previous_ground_steering_requests = []
 
+
 def populate_data(lines):
     lines.pop(0) #csv header line
     for line in lines:
@@ -35,9 +36,11 @@ def populate_prev_data(lines):
 def mergeCSV():
     f = open("../../mergedReports.csv","w")
     f.write("time_stamp;ground_steering_0;ground_steering_1;ground_steering_prev;\n")
-    i = 0
-    for ts in time_stamps:
-        f.write("{};{};{};{};\n".format(ts,ground_steering_requests[i],calc_ground_steering_requests[i],previous_ground_steering_requests[i]))
+    count = len(time_stamps) if len(previous_ground_steering_requests) > len(time_stamps) else len(previous_ground_steering_requests)
+    previous_off = count if len(previous_ground_steering_requests) - len(ground_steering_requests) > 0 else 0
+    off = count if len(ground_steering_requests) - len(previous_ground_steering_requests) > 0 else 0
+    for i in range(0, count):
+        f.write("{};{};{};{};\n".format(time_stamps[i+off],ground_steering_requests[i+off],calc_ground_steering_requests[i+off],previous_ground_steering_requests[i+previous_off]))
         i += 1
     f.close()
 
