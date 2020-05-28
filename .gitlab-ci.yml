@@ -21,7 +21,7 @@ variables:
   DOCKER_HOST: tcp://172.17.0.1:2375
   DOCKER_TLS_CERTDIR: "/certs"
   DOCKER_DRIVER: overlay2
-  DOCKER_BUILDKIT: 1
+  # DOCKER_BUILDKIT: 1
   DOCKER_CLI_EXPERIMENTAL: enabled
   BUILDX_URL: https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
   BUILDX_PLATFORM: linux/amd64,linux/arm64,linux/arm/v7
@@ -35,6 +35,7 @@ services:
 stages:
   - build
   - deploy
+  - test
  
 
 # This section describes what shall be done to build and test the project.
@@ -58,7 +59,11 @@ build-and-test:
   #    reports:
   #      cobertura: $CI_PROJECT_DIR/coverage/cobertura.xml
 
-
+performance:
+  stage:
+    test
+  script:
+    ls -a
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:

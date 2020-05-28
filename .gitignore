@@ -3,5 +3,5 @@ build
 export/
 csv/
 *.vscode
-*.sh
 img/
+builds/
