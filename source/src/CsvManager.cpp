@@ -5,7 +5,7 @@
 
 using namespace std;
 
-const char* CsvManager::path = "csv/reports.csv"; // Path to report
+const char* CsvManager::path = "/csv/reports.csv"; // Path to report
 const char CsvManager::delimiter = ';'; // Column separator
 
 // restore csv file
