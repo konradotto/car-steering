@@ -64,8 +64,9 @@ performance:
     test
   script: 
     - ./run.sh &
-    - sleep 1
+    - sleep 100
     - echo "Test"
+    - python3 analyser/src/analyser.py < csv/reports.csv
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
