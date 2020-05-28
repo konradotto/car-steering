@@ -69,7 +69,9 @@ performance:
     - ./run.sh || true
     - curl --location --output reports.csv "https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38131/artifacts/raw/csv/reports.csv" #"https://git.chalmers.se/courses/dit638/students/group_13/jobs/artifacts/master/download?job=performance&job_token=$CI_JOB_TOKEN"
     - ls -a
-    - python3 analyser/src/analyser.py < csv/reports.csv
+    - python3 analyser/src/mergeCSV.py reports.csv csv/reports.csv
+    - ls -a
+    - python3 analyser/src/analyser.py < mergedReports.csv
     - jobs
   artifacts:
     paths: 

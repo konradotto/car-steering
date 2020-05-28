@@ -33,12 +33,12 @@ def populate_prev_data(lines):
         previous_ground_steering_requests.append(pgr)
 
 def mergeCSV():
-    f = open("somename.csv","w")
+    f = open("../../mergedReports.csv","w")
     f.write("time_stamp;ground_steering_0;ground_steering_1;ground_steering_prev;\n")
     i = 0
     for ts in time_stamps:
         f.write("{};{};{};{};\n".format(ts,ground_steering_requests[i],calc_ground_steering_requests[i],previous_ground_steering_requests[i]))
-        i++
+        i += 1
     f.close()
 
 
