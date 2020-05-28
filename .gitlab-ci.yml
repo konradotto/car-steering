@@ -69,7 +69,8 @@ performance:
     - ./run.sh &
     - sleep 55
     - ps
-    - pkill -f decoder.sh
+    - pkill -f run-decoder.sh
+    - ps
     - pkill -f run.sh
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
