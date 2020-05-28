@@ -73,6 +73,7 @@ performance:
     paths: 
       - csv/reports.csv
     expire_in: 1 week
+    when: always
 
 # This section describes what shall be done to deploy artefacts from the project.
 release:
