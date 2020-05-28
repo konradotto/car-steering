@@ -1,6 +1,6 @@
 #!/bin/bash
 handle_exit() {
-	docker kill $(docker ps -q)
+	docker kill decoder
 	kill -9 %1
 }
 trap "exit" INT TERM ERR
