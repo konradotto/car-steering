@@ -97,7 +97,7 @@ release:
     refs:
       - tags
     variables:
-      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  v
+      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/
   variables:
     IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
