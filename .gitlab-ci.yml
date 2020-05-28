@@ -66,8 +66,11 @@ performance:
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
   script:
-    #- ./run.sh
+    - ./run.sh
     - echo "Test"
+    - 'curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/master/download?job=test&job_token=$CI_JOB_TOKEN"'
+    - unzip artifacts.zip
+    - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
   artifacts:
     paths: 
