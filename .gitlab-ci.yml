@@ -64,7 +64,8 @@ performance:
     - cool
   stage: build
   script:
-    - ./run.sh &
+    - ./run-vehicle-view.sh &
+    - python3 analyser/src/sele.py 1
     - sleep 55
     - echo "Test"
     - python3 analyser/src/analyser.py < csv/reports.csv
