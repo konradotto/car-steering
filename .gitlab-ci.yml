@@ -63,21 +63,24 @@ performance:
   tags:
     - cool
   stage: build
+  variables:
+    - nr: "1"
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
     - docker build -t group13:latest -f Dockerfile .
   script:
-    - ./run.sh 1 || true
+    - ./run.sh ${nr} || true
     - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     - cat reports.csv
     - cat csv/reports.csv
     - python3 analyser/src/mergeCSV.py csv/reports.csv reports.csv
     - cat mergedReports.csv
     - python3 analyser/src/analyser.py < mergedReports.csv
+    - mv performance.png "performancePlot${nr}.png"
   artifacts:
     paths: 
       - csv/reports.csv
-      - performance.png
+      - performancePlot${nr}.png
     expire_in: 1 week
     when: always
 
@@ -90,8 +93,7 @@ release:
     refs:
       - tags
     variables:
-      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  
-  variables:
+      - $CI_COMMIT_TAG =~ /^\Av(\d)\.(\d)\.(\d)\z/  v
     IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
     - mkdir -p $HOME/.docker/cli-plugins/
