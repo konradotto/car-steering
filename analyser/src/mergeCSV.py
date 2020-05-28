@@ -55,7 +55,9 @@ def get_lines(file):
     f.close()
 
 if __name__ == '__main__':
-    populate_data(get_lines(sys.argv[1]))
-    populate_prev_data(get_lines(sys.argv[2]))
+    new_csv = get_lines(sys.argv[1])
+    old_csv = get_lines(sys.argv[2])
+    populate_data(new_csv)
+    populate_prev_data(old_csv)
     mergeCSV()
     sys.exit()
