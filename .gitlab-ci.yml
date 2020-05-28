@@ -66,9 +66,8 @@ performance:
   before-script:
     - docker kill $(docker ps -q)
   script:
-    - ./run.sh &
+    - timeout 60 "./run.sh"
     - echo "Test"
-    - sleep 50
     - python3 analyser/src/analyser.py < csv/reports.csv
     - exit 0
 
