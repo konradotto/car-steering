@@ -68,7 +68,7 @@ performance:
   script:
     - ./run.sh || true
     #- ls csv/
-    #- "curl 'https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38172/artifacts/download' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' --compressed -H 'Referer: https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38172' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Cookie: sidebar_collapsed=false; diff_view=inline; frequently_used_emojis=thumbsup; _gitlab_session=7978d66a3ba2007f99f8aac66054fe72; event_filter=all' -H 'Upgrade-Insecure-Requests: 1' -H 'TE: Trailers' --output archive.zip"
+    - "curl 'https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38182/artifacts/file/csv/reports.csv' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' --compressed -H 'Referer: https://git.chalmers.se/courses/dit638/students/group_13/-/jobs/38182/artifacts/browse/csv/' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Cookie: sidebar_collapsed=false; diff_view=inline; frequently_used_emojis=thumbsup; _gitlab_session=7978d66a3ba2007f99f8aac66054fe72; event_filter=all' -H 'Upgrade-Insecure-Requests: 1' -H 'Cache-Control: max-age=0' -H 'TE: Trailers' --output myReport.csv"
     #- cat archive.zip
     #- unzip archive.zip
     #- ls csv/
@@ -90,6 +90,7 @@ performance:
     paths: 
       - csv/reports.csv
       - mergedReports.csv
+      - myReport.csv
     expire_in: 1 week
     when: always
 
