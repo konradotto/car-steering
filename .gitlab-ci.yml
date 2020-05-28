@@ -73,6 +73,8 @@ performance:
     - unzip artifacts.zip
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
+  after-script:
+    - docker kill $(docker ps -q)
   artifacts:
     paths: 
       - csv/reports.csv
