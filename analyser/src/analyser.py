@@ -63,7 +63,7 @@ def plot():
     plt.margins(x=0)
 
     plt.legend(loc=8, fontsize=16)
-    plt.show()
+    plt.savefig("performance.png")
     #fig1.show()
     #fig2.show()
 
