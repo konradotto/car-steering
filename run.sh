@@ -10,3 +10,5 @@ sleep 3
 ./run-group13.sh &
 
 sleep 20
+
+kill SIGINT
