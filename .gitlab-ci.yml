@@ -74,7 +74,6 @@ performance:
     #- unzip artifacts.zip
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
-    - kill $!
     - jobs
     - done
   artifacts:
