@@ -64,23 +64,24 @@ performance:
     - cool
   stage: build
   variables:
-    nr: 1
+    - $NR = 1
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
     - docker build -t group13:latest -f Dockerfile .
   script:
-    - ./run.sh ${nr} || true
+    - ./run.sh ${NR} || true
+    ##- 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     - 'curl --location --output reports.csv --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/raw/csv/reports.csv?job=performance"'
     - cat reports.csv
     - cat csv/reports.csv
     - python3 analyser/src/mergeCSV.py csv/reports.csv reports.csv
     - cat mergedReports.csv
     - python3 analyser/src/analyser.py < mergedReports.csv
-    - mv performance.png "performancePlot${nr}.png"
+    - mv performance.png "performancePlot${NR}.png"
   artifacts:
     paths: 
       - csv/reports.csv
-      - performancePlot${nr}.png
+      - performancePlot${NR}.png
     expire_in: 1 week
     when: always
 
