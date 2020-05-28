@@ -73,6 +73,7 @@ performance:
     #- unzip artifacts.zip
     - ls -a
     - python3 analyser/src/analyser.py < csv/reports.csv
+    - jobs
   artifacts:
     paths: 
       - csv/reports.csv
