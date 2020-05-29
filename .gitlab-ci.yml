@@ -75,11 +75,6 @@ performance:
     - mkdir unzipped && unzip artifacts.zip -d $_
     - mkdir charts
     - ./loop-recordings.sh
-    #- ./run.sh ${NR} || true
-    #- python3 analyser/src/mergeCSV.py csv/report${NR}.csv unzipped/csv/report${NR}.csv
-    #- cat mergedReports.csv
-    #- python3 analyser/src/analyser.py < mergedReports.csv
-    #- mv performance.png "performancePlot${NR}.png"
   artifacts:
     paths: 
       - csv/
