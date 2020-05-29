@@ -45,7 +45,7 @@ static const int32_t BLUE_AND_YELLOW_LINE   = 1;
 static const int32_t BLUE_LINE_ONLY         = 2;
 static const int32_t YELLOW_LINE_ONLY       = 3;
 
-static const double ANGLE_UPPER_LIMIT       = 0.152;      // limit for absolute value of gsr
+static const double ANGLE_UPPER_LIMIT       = 0.3;      // limit for absolute value of gsr
 
 bool missingCommandLineArguments(auto arguments, char *argv[]);
 void initVehicleContour(std::vector<cv::Point> &vehicleContour, int width, int height); // function to create a contour for cropping out the vehicle
