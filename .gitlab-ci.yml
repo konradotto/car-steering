@@ -59,18 +59,16 @@ stages:
 #      reports:
 #        cobertura: $CI_PROJECT_DIR/coverage/cobertura.xml
 
+
+# performance job creating .csv-files and plots
 performance:
   tags:
     - cool
   stage: build
-  variables:
-    NR: "1"
-    END: 5
   before_script:
     - docker build -t sele -f sele/Dockerfile sele/
     - docker build -t group13:latest -f Dockerfile .
   script:
-    
     - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN:tfnS3wsBLJJPUNSpS2TD" "https://git.chalmers.se/api/v4/projects/849/jobs/artifacts/feature/28-local-runner/download?job=performance"'
     - mkdir unzipped && unzip artifacts.zip -d $_
     - mkdir charts
