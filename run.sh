@@ -10,7 +10,7 @@ sleep 5
 docker run -i --rm --net=host sele $selection
 sleep 5 
 ./run-group13.sh & 
-sleep 20
+sleep 100
 
 pkill -f ./run-group13.sh
 pkill -f ./run-decoder.sh

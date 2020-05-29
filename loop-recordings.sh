@@ -7,8 +7,6 @@ for i in $(seq 1 $END);
     python3 analyser/src/mergeCSV.py csv/report${i}.csv unzipped/csv/report${i}.csv;
     cat mergedReports.csv;
     python3 analyser/src/analyser.py < mergedReports.csv;
-    mv performance.png "charts/performancePlot${NR}.png";
+    mv performance.png "charts/performancePlot${i}.png";
     rm mergedReports.csv
-    docker kill vehicle-view
-    sleep 5
 done
